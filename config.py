@@ -4,4 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.environ.get('BOT_TOKEN')
+TOKEN: str = os.environ.get('BOT_TOKEN')
+
+SUBJECTS: list[str] = ['английский']
