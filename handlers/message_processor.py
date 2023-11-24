@@ -44,6 +44,6 @@ async def choice_exercise(message: Message, state: FSMContext):
 		await state.update_data(page=message.text)
 
 		data = await state.get_data()
-		photos_with_solve = get_solve(data)
+		photos_with_solve = get_solve(data=data, pages=True)
 	else:
 		await message.reply('Такой страницы не существует')
