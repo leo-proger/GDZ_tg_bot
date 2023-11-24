@@ -5,7 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, URLInputFile, ReplyKeyboardRemove
 
 from config import SUBJECTS
-from keyboards.choice_gdz import choice_subject_kb
+from keyboards.choice_gdz import select_subject_kb
 from main import bot
 from parser import get_solve
 
@@ -23,7 +23,7 @@ async def greeting_and_choice_subject(message: Message, state: FSMContext):
 
 	await message.answer(f'Привет, {message.from_user.first_name}')
 
-	kb = choice_subject_kb()
+	kb = select_subject_kb()
 
 	await message.answer('Выбери предмет 🗃', reply_markup=kb)
 

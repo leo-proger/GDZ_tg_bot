@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import config
 
 
-def choice_subject_kb() -> ReplyKeyboardMarkup:
+def select_subject_kb() -> ReplyKeyboardMarkup:
 	builder = ReplyKeyboardBuilder()
 
 	for subject in config.SUBJECTS['with_pages'].values():
