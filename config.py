@@ -6,12 +6,11 @@ load_dotenv()
 
 TOKEN: str = os.environ.get('BOT_TOKEN')
 
-# Предмет, тип (учебник, рабочая тетрадь и тд), класс, авторы
-SUBJECTS: dict[str: dict[str: str]] = {
-	'with_pages':
-		{
-			'english': 'Английский Spotlight 10 класс Эванс',
-			}
+# Со страницами или другой вид выбора задания -> Предмет -> Серия (Серия, Класс, Авторы)
+SUBJECTS: dict = {
+	'with_pages': {
+		'Английский': ['Spotlight 10 Класс Эванс', ]
+		}
 	}
 
 HEADERS = {
