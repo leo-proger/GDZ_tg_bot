@@ -1,9 +1,12 @@
 import asyncio
+import logging
 
 from aiogram import Bot, Dispatcher
 
 import config
 from handlers import message_processor
+
+logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=config.TOKEN, parse_mode='html')
 
