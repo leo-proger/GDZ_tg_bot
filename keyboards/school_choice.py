@@ -10,5 +10,5 @@ def select_book_kb() -> ReplyKeyboardMarkup:
 	for book in config.BOOKS:
 		builder.add(KeyboardButton(text=book))
 
-	# builder.adjust(num) сколько кнопок будет по горизонтали
+	builder.adjust(1)  # сколько кнопок будет по горизонтали
 	return builder.as_markup(resize_keyboard=True)

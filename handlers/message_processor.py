@@ -14,7 +14,7 @@ router = Router()
 
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
-	page = State()  # Страница учебника
+	page_or_exercise = State()  # Страница учебника
 
 
 @router.message(Command('start'))
@@ -29,20 +29,24 @@ async def greeting_and_select_book(message: Message, state: FSMContext) -> None:
 
 
 @router.message(Form.book)
-async def select_page(message: Message, state: FSMContext) -> None:
+async def select_page_or_exercise(message: Message, state: FSMContext) -> None:
 	if message.text in BOOKS:
 		await state.update_data(book=message.text)
-		await state.set_state(Form.page)
+		await state.set_state(Form.page_or_exercise)
 
-		await message.answer('Теперь введи страницу 📃', reply_markup=ReplyKeyboardRemove())
+		book = message.text.split()[0]
+		if book == 'Русский':
+			await message.answer('Теперь введи упражнение 📃', reply_markup=ReplyKeyboardRemove())
+		elif book == 'Английский':
+			await message.answer('Теперь введи страницу 📖', reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Такого учебника, у меня нет 😕')
 
 
-@router.message(Form.page)
+@router.message(Form.page_or_exercise)
 async def get_exercise_solve(message: Message, state: FSMContext) -> None:
 	if message.text.isdigit():
-		await state.update_data(page=message.text)
+		await state.update_data(page_or_exercise=message.text)
 		data: dict = await state.get_data()
 
 		# Список url фото с решениями и название файла
@@ -64,4 +68,4 @@ async def get_exercise_solve(message: Message, state: FSMContext) -> None:
 				'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)',
 				parse_mode='MARKDOWN')
 	else:
-		await message.reply('Такой страницы не существует')
+		await message.reply('Такой страницы/упражнения у меня нет 😕')
