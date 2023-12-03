@@ -4,7 +4,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import config
 
 
-# TODO: Изменить название данного файла
 def book_selection_kb() -> ReplyKeyboardMarkup:
 	builder = ReplyKeyboardBuilder()
 
