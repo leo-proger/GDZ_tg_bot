@@ -16,5 +16,5 @@ HEADERS: dict[str: str] = {
 	'User-Agent': 'Mozilla/5.0',
 	}
 
-ERROR_MESSAGE_404 = 'Страница не найдена'
+ERROR_MESSAGE_404 = 'Страница/Упражнение не найдено'
 ERROR_MESSAGE_500 = 'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)'

@@ -68,8 +68,6 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 			solutions_url = result.get('solutions_url')
 
 			await send_solve(message=message, solutions_url=solutions_url, title=title)
-
-			await message.answer(title)
 		elif status_code == 404:
 			await message.answer(config.ERROR_MESSAGE_404)
 		elif status_code == 500:
