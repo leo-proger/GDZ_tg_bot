@@ -18,12 +18,15 @@ def parse_gdz(url: str) -> int | list[str]:
 
 
 def get_solve(book: str, page_or_exercise: int) -> dict:
+	subject_urls = {
+		'английский': rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{page_or_exercise}-s/',
+		'русский': rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{page_or_exercise}-nom/',
+		}
 	subject = book.split()[0].lower()
-	url = None
-	if subject == 'английский':
-		url = rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{page_or_exercise}-s/'
-	elif subject == 'русский':
-		url = rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{page_or_exercise}-nom/'
+
+	url = subject_urls.get(subject)
+	if url is None:
+		return {'status_code': 404}
 
 	solutions_url = parse_gdz(url)
 
