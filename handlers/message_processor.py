@@ -19,7 +19,7 @@ class Form(StatesGroup):
 
 
 @router.message(Command('start'))
-async def greeting_and_select_book(message: Message, state: FSMContext) -> None:
+async def greeting_and_book_select(message: Message, state: FSMContext) -> None:
 	await state.set_state(Form.book)
 
 	await message.answer(f'Привет, {message.from_user.first_name}')
@@ -30,7 +30,7 @@ async def greeting_and_select_book(message: Message, state: FSMContext) -> None:
 
 
 @router.message(Form.book)
-async def select_page_or_exercise(message: Message, state: FSMContext) -> None:
+async def page_or_exercise_selection(message: Message, state: FSMContext) -> None:
 	if message.text == config.BOOKS.get('Русский'):
 		await state.update_data(book=message.text)
 		await state.set_state(Form.exercise)
@@ -71,11 +71,9 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 
 			await message.answer(title)
 		elif status_code == 404:
-			await message.answer('Страница не найдена')
+			await message.answer(config.ERROR_MESSAGE_404)
 		elif status_code == 500:
-			await message.answer(
-				'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)',
-				parse_mode='MARKDOWN')
+			await message.answer(config.ERROR_MESSAGE_500, parse_mode='MARKDOWN')
 	else:
 		await message.reply(error_message)
 
