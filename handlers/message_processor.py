@@ -5,7 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, URLInputFile, ReplyKeyboardRemove
 
 import config
-from keyboards.school_choice import select_book_kb
+from keyboards.school_choice import book_selection_kb
 from main import bot
 from parser import get_solve
 
@@ -24,7 +24,7 @@ async def greeting_and_book_select(message: Message, state: FSMContext) -> None:
 
 	await message.answer(f'Привет, {message.from_user.first_name}')
 
-	kb = select_book_kb()
+	kb = book_selection_kb()
 
 	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=kb)
 

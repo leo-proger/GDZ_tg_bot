@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import config
 
 
-def select_book_kb() -> ReplyKeyboardMarkup:
+def book_selection_kb() -> ReplyKeyboardMarkup:
 	builder = ReplyKeyboardBuilder()
 
 	for book in config.BOOKS.values():
