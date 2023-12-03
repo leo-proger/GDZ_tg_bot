@@ -5,28 +5,25 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, URLInputFile, ReplyKeyboardRemove
 
 import config
-from keyboards.school_choice import book_selection_kb
+from keyboards.keyboards import book_selection_kb
 from main import bot
 from parser import get_solve
 
 router = Router()
 
 
+# TODO: Изменить название данного файла
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
 	page = State()  # Страница учебника
 	exercise = State()  # Упражнение в учебнике
 
 
-@router.message(Command('start'))
-async def greeting_and_book_select(message: Message, state: FSMContext) -> None:
+@router.message(Command('list'))
+async def book_selection(message: Message, state: FSMContext) -> None:
 	await state.set_state(Form.book)
 
-	await message.answer(f'Привет, {message.from_user.first_name}')
-
-	kb = book_selection_kb()
-
-	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=kb)
+	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
 
 
 @router.message(Form.book)
@@ -71,9 +68,10 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 		elif status_code == 404:
 			await message.answer(config.ERROR_MESSAGE_404)
 		elif status_code == 500:
-			await message.answer(config.ERROR_MESSAGE_500, parse_mode='MARKDOWN')
+			await message.answer(config.ERROR_MESSAGE_500)
 	else:
 		await message.reply(error_message)
+	await state.clear()
 
 
 @router.message(Form.exercise)
