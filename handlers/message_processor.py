@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, URLInputFile, ReplyKeyboardRemove
 
-from config import BOOKS
+import config
 from keyboards.school_choice import select_book_kb
 from main import bot
 from parser import get_solve
@@ -14,7 +14,8 @@ router = Router()
 
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
-	page_or_exercise = State()  # Страница учебника
+	page = State()  # Страница учебника
+	exercise = State()  # Упражнение в учебнике
 
 
 @router.message(Command('start'))
@@ -30,23 +31,32 @@ async def greeting_and_select_book(message: Message, state: FSMContext) -> None:
 
 @router.message(Form.book)
 async def select_page_or_exercise(message: Message, state: FSMContext) -> None:
-	if message.text in BOOKS:
+	if message.text == config.BOOKS.get('Русский'):
 		await state.update_data(book=message.text)
-		await state.set_state(Form.page_or_exercise)
+		await state.set_state(Form.exercise)
 
-		book = message.text.split()[0]
-		if book == 'Русский':
-			await message.answer('Теперь введи упражнение 📃', reply_markup=ReplyKeyboardRemove())
-		elif book == 'Английский':
-			await message.answer('Теперь введи страницу 📖', reply_markup=ReplyKeyboardRemove())
+		await message.answer('Теперь введи упражнение 📃', reply_markup=ReplyKeyboardRemove())
+
+	elif message.text == config.BOOKS.get('Английский'):
+		await state.update_data(book=message.text)
+		await state.set_state(Form.page)
+
+		await message.answer('Теперь введи страницу 📖', reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Такого учебника, у меня нет 😕')
 
 
-@router.message(Form.page_or_exercise)
-async def get_exercise_solve(message: Message, state: FSMContext) -> None:
+async def send_solve(message: Message, solutions_url: list[str], title: str) -> None:
+	for url in solutions_url:
+		image = URLInputFile(url, filename=title)
+		await bot.send_photo(chat_id=message.chat.id, photo=image)
+
+	await message.answer(title)
+
+
+async def get_solve_data(message: Message, state: FSMContext, data_key: str, error_message: str) -> None:
 	if message.text.isdigit():
-		await state.update_data(page_or_exercise=message.text)
+		await state.update_data({data_key: message.text})
 		data: dict = await state.get_data()
 
 		# Список url фото с решениями и название файла
@@ -55,10 +65,9 @@ async def get_exercise_solve(message: Message, state: FSMContext) -> None:
 
 		if status_code == 200:
 			title = result.get('title')
+			solutions_url = result.get('solutions_url')
 
-			for url in result.get('solutions_url'):
-				image = URLInputFile(url, filename=title)
-				await bot.send_photo(chat_id=message.chat.id, photo=image)
+			await send_solve(message=message, solutions_url=solutions_url, title=title)
 
 			await message.answer(title)
 		elif status_code == 404:
@@ -68,4 +77,14 @@ async def get_exercise_solve(message: Message, state: FSMContext) -> None:
 				'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)',
 				parse_mode='MARKDOWN')
 	else:
-		await message.reply('Такой страницы/упражнения у меня нет 😕')
+		await message.reply(error_message)
+
+
+@router.message(Form.exercise)
+async def get_solve_exercise(message: Message, state: FSMContext) -> None:
+	await get_solve_data(message, state, 'exercise', 'Такого упражнения у меня нет 😕')
+
+
+@router.message(Form.page)
+async def get_solve_page(message: Message, state: FSMContext) -> None:
+	await get_solve_data(message, state, 'page', 'Такой страницы у меня нет 😕')
