@@ -11,6 +11,7 @@ def parse_gdz(url: str) -> int | list[str]:
 
 	soup = BeautifulSoup(request.text, 'html.parser')
 
+	# TODO: Обработка ситуаций, когда "номер отсутствует" в гдз
 	# Url фоток с решениями
 	solutions_url: list[str] = ['https:' + div.img['src'] for div in soup.find_all('div', class_='with-overtask')]
 
@@ -31,7 +32,7 @@ def get_solve(book: str, page_or_exercise: int) -> dict:
 	solutions_url = parse_gdz(url)
 
 	if isinstance(solutions_url, list):
-		title = f"{book}, страница/упражнение {page_or_exercise}"
+		title = f"***{book}***, страница/упражнение ***{page_or_exercise}***"
 		return {'title': title, 'solutions_url': solutions_url, 'status_code': 200}
 
 	return {'status_code': 404}

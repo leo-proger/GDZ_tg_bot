@@ -12,21 +12,18 @@ from parser import get_solve
 router = Router()
 
 
+# TODO: Изменить название данного файла
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
 	page = State()  # Страница учебника
 	exercise = State()  # Упражнение в учебнике
 
 
-@router.message(Command('start'))
-async def greeting_and_book_select(message: Message, state: FSMContext) -> None:
+@router.message(Command('list'))
+async def book_selection(message: Message, state: FSMContext) -> None:
 	await state.set_state(Form.book)
 
-	await message.answer(f'Привет, {message.from_user.first_name}')
-
-	kb = book_selection_kb()
-
-	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=kb)
+	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
 
 
 @router.message(Form.book)
@@ -51,7 +48,7 @@ async def send_solve(message: Message, solutions_url: list[str], title: str) -> 
 		image = URLInputFile(url, filename=title)
 		await bot.send_photo(chat_id=message.chat.id, photo=image)
 
-	await message.answer(title)
+	await message.answer(title, parse_mode='Markdown')
 
 
 async def get_solve_data(message: Message, state: FSMContext, data_key: str, error_message: str) -> None:
@@ -74,6 +71,7 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 			await message.answer(config.ERROR_MESSAGE_500, parse_mode='MARKDOWN')
 	else:
 		await message.reply(error_message)
+	await state.clear()
 
 
 @router.message(Form.exercise)
