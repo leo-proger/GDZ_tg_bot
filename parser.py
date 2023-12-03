@@ -12,6 +12,7 @@ def parse_gdz(url: str) -> int | list[str]:
 	soup = BeautifulSoup(request.text, 'html.parser')
 
 	# TODO: Обработка ситуаций, когда "номер отсутствует" в гдз
+
 	# Url фоток с решениями
 	solutions_url: list[str] = ['https:' + div.img['src'] for div in soup.find_all('div', class_='with-overtask')]
 

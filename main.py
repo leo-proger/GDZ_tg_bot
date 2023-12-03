@@ -8,8 +8,7 @@ from handlers import message_processor, default_handlers
 
 logging.basicConfig(level=logging.INFO)
 
-# TODO: Сменить parse_mode на MARKDOWN
-bot = Bot(token=config.TOKEN, parse_mode='html')
+bot = Bot(token=config.TOKEN, parse_mode='Markdown')
 
 
 async def main():

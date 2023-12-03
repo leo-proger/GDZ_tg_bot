@@ -5,7 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, URLInputFile, ReplyKeyboardRemove
 
 import config
-from keyboards.school_choice import book_selection_kb
+from keyboards.keyboards import book_selection_kb
 from main import bot
 from parser import get_solve
 
@@ -48,7 +48,7 @@ async def send_solve(message: Message, solutions_url: list[str], title: str) -> 
 		image = URLInputFile(url, filename=title)
 		await bot.send_photo(chat_id=message.chat.id, photo=image)
 
-	await message.answer(title, parse_mode='Markdown')
+	await message.answer(title)
 
 
 async def get_solve_data(message: Message, state: FSMContext, data_key: str, error_message: str) -> None:
@@ -68,7 +68,7 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 		elif status_code == 404:
 			await message.answer(config.ERROR_MESSAGE_404)
 		elif status_code == 500:
-			await message.answer(config.ERROR_MESSAGE_500, parse_mode='MARKDOWN')
+			await message.answer(config.ERROR_MESSAGE_500)
 	else:
 		await message.reply(error_message)
 	await state.clear()

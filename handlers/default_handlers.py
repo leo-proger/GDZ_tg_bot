@@ -10,8 +10,8 @@ router = Router()
 @router.message(Command('start'))
 async def greeting(message: Message) -> None:
 	await message.answer(config.GREETING_MESSAGE.format(first_name=message.from_user.first_name,
-	                                                    last_name=message.from_user.last_name),
-	                     parse_mode='Markdown')
+	                                                    last_name=message.from_user.last_name)
+	                     )
 
 
 @router.message(F.text)
