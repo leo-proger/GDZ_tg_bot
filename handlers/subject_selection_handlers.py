@@ -57,7 +57,8 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 		data: dict = await state.get_data()
 
 		# Список url фото с решениями и название файла
-		result = get_solve(*data.values())
+
+		result = await get_solve(*data.values())
 		status_code = result.get('status_code', 500)
 
 		if status_code == 200:
