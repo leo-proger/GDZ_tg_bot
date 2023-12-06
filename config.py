@@ -20,3 +20,5 @@ ERROR_MESSAGE_404 = 'Страница/Упражнение не найдено'
 ERROR_MESSAGE_500 = 'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)'
 
 GREETING_MESSAGE = 'Привет, ***{first_name} {last_name}***!\n\nЧтобы посмотреть доступные учебники введи /list'
+
+SLEEP_TIME: int = 120
