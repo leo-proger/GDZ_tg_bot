@@ -12,7 +12,6 @@ from parser import get_solve
 router = Router()
 
 
-# TODO: Изменить название данного файла
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
 	page = State()  # Страница учебника
@@ -41,6 +40,7 @@ async def page_or_exercise_selection(message: Message, state: FSMContext) -> Non
 		await message.answer('Теперь введи страницу 📖', reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Такого учебника, у меня нет 😕')
+		await state.clear()
 
 
 async def send_solve(message: Message, solutions_url: list[str], title: str) -> None:
@@ -56,9 +56,8 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 		await state.update_data({data_key: message.text})
 		data: dict = await state.get_data()
 
-		# Список url фото с решениями и название файла
-
-		result = await get_solve(*data.values())
+		# Список url фото с решениями
+		result = await get_solve(**data)
 		status_code = result.get('status_code', 500)
 
 		if status_code == 200:
@@ -72,7 +71,7 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 			await message.answer(config.ERROR_MESSAGE_500)
 	else:
 		await message.reply(error_message)
-	await state.clear()
+		await state.clear()
 
 
 @router.message(Form.exercise)
