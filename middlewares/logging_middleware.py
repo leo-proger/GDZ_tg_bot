@@ -29,7 +29,7 @@ class LoggingMiddleware(BaseMiddleware):
 			else:
 				self.users[user_id] = time.time()
 
-		username = user.first_name or '' + ' ' + user.last_name or ''
+		username = (user.first_name or '') + ' ' + (user.last_name or '')
 		logging.info(f'User: {username}, {user_id}')
 
 		result = await handler(event, data)
