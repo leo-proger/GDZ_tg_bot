@@ -34,7 +34,7 @@ async def get_solve(book: str, page: str = None, exercise: str = None, number: s
 		'английский': rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{page}-s/',
 		'русский': rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{exercise}-nom/',
 		'алгебра-задачник': r'https://gdz.ru/class-10/algebra/reshebnik-mordkovich-a-g/{}-item-{}/'.format(
-			*number.split('.'))
+			*(number.split('.') if number else ['', '']), None)
 		}
 	subject = book.split()[0].lower()
 

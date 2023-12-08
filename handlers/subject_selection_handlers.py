@@ -89,7 +89,7 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
 			await message.answer(config.ERROR_MESSAGE_500)
 	else:
 		await message.reply(error_message)
-		await state.clear()
+	await state.clear()
 
 
 async def send_solve(message: Message, solutions_url: list[str], title: str) -> None:
