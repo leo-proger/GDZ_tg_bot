@@ -44,7 +44,6 @@ async def get_solve(book: str, page: str = None, exercise: str = None, number: s
 
 	solutions_url = await parse_gdz(url)
 
-	print(f'{page}, {exercise}, {number}')
 	if solutions_url:
 		title = ''
 		if page is not None:
