@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -96,5 +98,8 @@ async def send_solve(message: Message, solutions_url: list[str], title: str) -> 
 	for url in solutions_url:
 		image = URLInputFile(url, filename=title)
 		await bot.send_photo(chat_id=message.chat.id, photo=image)
+
+		# Задержка после отправки, чтобы телеграм не выдавал ошибку
+		await asyncio.sleep(0.3)
 
 	await message.answer(title)
