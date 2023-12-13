@@ -98,6 +98,8 @@ async def get_solve(book: str, page: str = None, exercise: str = None, number: s
 		text, suffix = 'Упражнение', 'о'
 	elif number is not None:
 		text, suffix = 'Номер', ''
+	elif paragraph is not None:
+		text, suffix = 'Параграф', ''
 
 	return {'text': text, 'suffix': suffix, 'status_code': 404}
 
