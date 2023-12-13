@@ -3,6 +3,7 @@ import re
 import aiohttp
 from bs4 import BeautifulSoup
 
+import config
 from config import HEADERS, NUMBER_PATTERN
 
 
@@ -27,14 +28,19 @@ async def parse_gdz(url: str) -> None | list[str]:
 
 
 async def get_solve(book: str, page: str = None, exercise: str = None, number: str = None) -> dict:
-	if number and not re.match(NUMBER_PATTERN, number):
+	if number and (book == config.BOOKS.get('алгебра-задачник')) and (not re.match(NUMBER_PATTERN, number)):
 		return {'text': 'Номер', 'ending': '', 'status_code': 404}
 
 	subject_urls = {
 		'английский': rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{page}-s/',
 		'русский': rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{exercise}-nom/',
+
 		'алгебра-задачник': r'https://gdz.ru/class-10/algebra/reshebnik-mordkovich-a-g/{}-item-{}/'.format(
-			*(number.split('.') if number else ['', '']), None)
+			*(number.split('.') if number else ['', '']), None),
+
+		'геометрия': 'https://gdz.ru/class-10/geometria/atanasyan-10-11/{}-class-{}/'.format(
+			'10' if number and '.' not in number and int(number) < 400 else '11', number
+			)
 		}
 	subject = book.split()[0].lower()
 

@@ -14,6 +14,7 @@ router = Router()
 
 class Form(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора, серия
+
 	page = State()  # Страница учебника
 	exercise = State()  # Упражнение в учебнике
 	number = State()  # Номер задания
@@ -32,19 +33,29 @@ async def page_or_exercise_selection(message: Message, state: FSMContext) -> Non
 		await state.update_data(book=message.text)
 		await state.set_state(Form.exercise)
 
-		await message.answer('Теперь введи упражнение 📃\n\nНапример: _123_', reply_markup=ReplyKeyboardRemove())
+		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
 
 	elif message.text == config.BOOKS.get('английский'):
 		await state.update_data(book=message.text)
 		await state.set_state(Form.page)
 
-		await message.answer('Теперь введи страницу 📖\n\nНапример: _109_', reply_markup=ReplyKeyboardRemove())
+		await message.answer('Теперь введи страницу 📖 _(от 10 до 180 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
 
 	elif message.text == config.BOOKS.get('алгебра-задачник'):
 		await state.update_data(book=message.text)
 		await state.set_state(Form.number)
 
-		await message.answer('Теперь введи номер задания 📖\n\nНапример: _21.9_', reply_markup=ReplyKeyboardRemove())
+		await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
+
+	elif message.text == config.BOOKS.get('геометрия'):
+		await state.update_data(book=message.text)
+		await state.set_state(Form.number)
+
+		await message.answer('Теперь введи номер задания 📖 _(от 1 до 870 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Такого учебника, у меня нет 😕')
 		await state.clear()
@@ -71,6 +82,8 @@ async def get_solve_number(message: Message, state: FSMContext) -> None:
 async def get_solve_data(message: Message, state: FSMContext, data_key: str, error_message: str) -> None:
 	if message.text.isdigit() or message.text.replace('.', '', 1).isdigit():
 		await state.update_data({data_key: message.text})
+
+		# book, page or exercise or number
 		data: dict = await state.get_data()
 
 		# Список url фото с решениями
