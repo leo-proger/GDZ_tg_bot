@@ -5,7 +5,7 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from config import SLEEP_TIME
+from app.config import SLEEP_TIME
 
 
 class LoggingMiddleware(BaseMiddleware):
