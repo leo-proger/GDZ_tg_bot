@@ -113,6 +113,6 @@ async def send_solve(message: Message, solutions_url: list[str], title: str) -> 
 		await bot.send_photo(chat_id=message.chat.id, photo=image)
 
 		# Задержка после отправки, чтобы телеграм не выдавал ошибку
-		await asyncio.sleep(0.3)
+		await asyncio.sleep(config.MESSAGE_DELAY)
 
 	await message.answer(title)

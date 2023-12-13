@@ -25,6 +25,6 @@ GREETING_MESSAGE: str = 'Привет, ***{first_name} {last_name}***!\n\nЧто
 
 SLEEP_TIME: int = 120
 
-# TODO: Добавить MESSAGE_DELAY = 0.3
+MESSAGE_DELAY = 0.3
 
 NUMBER_PATTERN: str = r'^([1-9]|[1-3][0-9]|4[0-9]|49)\.\d+$'
