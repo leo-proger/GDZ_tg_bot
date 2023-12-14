@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN: str = os.environ.get('BOT_TOKEN')
+DATABASE_PATH: str = os.environ.get('DATABASE_PATH')
 
 # Предмет -> Серия учебника -> Класс -> Авторы
 BOOKS: dict[str: str] = {
