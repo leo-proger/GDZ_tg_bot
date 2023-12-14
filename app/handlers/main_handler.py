@@ -6,8 +6,8 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 from app import config
 from app.keyboards.keyboards import book_selection_kb
-from . import selection_number
 from . import selection_exercise
+from . import selection_number
 from . import selection_page
 from . import selection_paragraph
 

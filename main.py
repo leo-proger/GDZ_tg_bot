@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from app.config import TOKEN
 from app.handlers import main_handler, default_handlers
-from app.middlewares.logging_middleware import LoggingMiddleware
+from app.middlewares.add_user_to_db_middleware import AddUserToDatabaseMiddleware
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,8 +15,8 @@ bot = Bot(token=TOKEN, parse_mode='Markdown')
 async def main():
 	dp = Dispatcher()
 
-	main_handler.router.message.middleware(LoggingMiddleware())
-	default_handlers.router.message.middleware(LoggingMiddleware())
+	main_handler.router.message.middleware(AddUserToDatabaseMiddleware())
+	default_handlers.router.message.middleware(AddUserToDatabaseMiddleware())
 
 	dp.include_routers(
 		main_handler.router,
