@@ -21,7 +21,7 @@ router.include_routers(
 
 
 class FormBook(StatesGroup):
-	book = State()  # Отдельный учебник какого-то автора, серия
+	book = State()  # Отдельный учебник какого-то автора
 
 
 @router.message(Command('list'))
@@ -68,5 +68,5 @@ async def page_or_exercise_selection(message: Message, state: FSMContext) -> Non
 		                     'Если у вас параграф вида _"число-число"_, то просто введите число перед дефисом',
 		                     reply_markup=ReplyKeyboardRemove())
 	else:
-		await message.reply('Такого учебника, у меня нет 😕')
+		await message.reply('Такого учебника, у меня нет 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()
