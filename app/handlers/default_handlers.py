@@ -14,6 +14,11 @@ async def greeting(message: Message) -> None:
 	                     )
 
 
+@router.message(Command('help'))
+async def get_help(message: Message) -> None:
+	await message.answer(config.GET_HELP_MESSAGE)
+
+
 @router.message(F.text)
 async def other_text(message: Message):
 	await message.answer('Чтобы отобразить список учебников, введите /list')
