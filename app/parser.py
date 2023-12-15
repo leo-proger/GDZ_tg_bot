@@ -3,8 +3,8 @@ import re
 import aiohttp
 from bs4 import BeautifulSoup
 
-import config
-from config import HEADERS, NUMBER_PATTERN
+from app import config
+from app.config import HEADERS, NUMBER_PATTERN
 
 
 async def parse_resheba(url: str) -> None | str:

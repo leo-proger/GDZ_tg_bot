@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-import config
+from app import config
 
 router = Router()
 
@@ -12,6 +12,11 @@ async def greeting(message: Message) -> None:
 	await message.answer(config.GREETING_MESSAGE.format(first_name=message.from_user.first_name,
 	                                                    last_name=message.from_user.last_name)
 	                     )
+
+
+@router.message(Command('help'))
+async def get_help(message: Message) -> None:
+	await message.answer(config.GET_HELP_MESSAGE)
 
 
 @router.message(F.text)

@@ -1,7 +1,7 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-import config
+from app import config
 
 
 def book_selection_kb() -> ReplyKeyboardMarkup:
