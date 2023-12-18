@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: zWZQ7EQ3e%TH
+    volumes:
+      - /data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always
+  app:
+    build: .
+    command: python main.py
+    environment:
+      BOT_TOKEN: 6804375977:AAGUyGzxj3WSQqixe2_32mYxrMUmaBXApGk
+    depends_on:
+      - mysql
+    restart: always

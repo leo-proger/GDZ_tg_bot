@@ -1,6 +1,5 @@
-import aiosqlite
-
-from .config import DATABASE_PATH
+import aiomysql
+from .config import MYSQL_ROOT_PASSWORD
 
 
 class User:
@@ -10,16 +9,22 @@ class User:
 		self.last_name = last_name
 
 	async def add_user(self) -> dict[str: int]:
-		async with aiosqlite.connect(DATABASE_PATH) as db:
-			async with db.cursor() as cur:
+		pool = await aiomysql.create_pool(
+			host='mysql',
+			user='root',
+			password=MYSQL_ROOT_PASSWORD
+			)
+
+		async with pool.acquire() as conn:
+			async with conn.cursor() as cur:
 				# Проверка наличия пользователя в базе данных
-				await cur.execute('SELECT * FROM Users WHERE telegram_id = ?', (self.telegram_id,))
+				await cur.execute('SELECT * FROM Users WHERE telegram_id = %s', (self.telegram_id,))
 				user = await cur.fetchone()
 
 				# Если пользователь не найден, добавляем его в базу данных
 				if user is None:
-					await cur.execute('INSERT INTO Users ("telegram_id", "first_name", "last_name") VALUES (?, ?, ?)',
+					await cur.execute('INSERT INTO Users (telegram_id, first_name, last_name) VALUES (%s, %s, %s)',
 					                  (self.telegram_id, self.first_name, self.last_name))
-					await db.commit()
+					await conn.commit()
 					return {'status_code': 200}
 				return {'status_code': 409}
