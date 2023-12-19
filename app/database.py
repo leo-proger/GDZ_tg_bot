@@ -1,5 +1,6 @@
 import aiomysql
-from .config import MYSQL_ROOT_PASSWORD
+
+from .config import MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE
 
 
 class User:
@@ -10,9 +11,10 @@ class User:
 
 	async def add_user(self) -> dict[str: int]:
 		pool = await aiomysql.create_pool(
-			host='mysql',
-			user='root',
-			password=MYSQL_ROOT_PASSWORD
+			host=MYSQL_HOST,
+			user=MYSQL_USER,
+			password=MYSQL_PASSWORD,
+			db=MYSQL_DATABASE
 			)
 
 		async with pool.acquire() as conn:

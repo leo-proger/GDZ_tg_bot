@@ -1,14 +1,11 @@
 import os
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 TOKEN: str = os.environ.get('BOT_TOKEN')
 
-# MYSQL_USER: str = os.environ.get('MYSQL_USER')
-MYSQL_ROOT_PASSWORD: str = os.environ.get('MYSQL_ROOT_PASSWORD')
-# MYSQL_DATABASE: str = os.environ.get('MYSQL_DATABASE')
+MYSQL_HOST: str = os.environ.get('MYSQL_HOST')
+MYSQL_USER: str = os.environ.get('MYSQL_USER')
+MYSQL_PASSWORD: str = os.environ.get('MYSQL_PASSWORD')
+MYSQL_DATABASE: str = os.environ.get('MYSQL_DATABASE')
 
 # Предмет -> Серия учебника -> Класс -> Авторы
 BOOKS: dict[str: str] = {
