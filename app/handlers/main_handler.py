@@ -53,8 +53,9 @@ async def get_solve(message: Message, state: FSMContext) -> None:
 			title = result.get('title')
 
 			await send_solution(message, solution, title)
-			await state.clear()
 		else:
 			await message.answer('Не найдено 😕')
+			await state.clear()
 	else:
 		await message.answer('Не найдено 😕')
+		await state.clear()
