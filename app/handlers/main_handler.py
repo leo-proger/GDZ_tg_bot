@@ -56,7 +56,6 @@ async def get_solve(message: Message, state: FSMContext) -> None:
 			await state.clear()
 		else:
 			await message.answer('Не найдено 😕')
-			await state.clear()
 	else:
 		await message.answer('Не найдено 😕')
 		await state.clear()
