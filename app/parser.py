@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -7,7 +8,25 @@ from app import config
 from app.config import HEADERS, NUMBER_PATTERN
 
 
-async def parse_resheba(url: str) -> None | str:
+async def parse_resheba_html(soup: BeautifulSoup) -> str:
+	# Текст решения
+	solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
+	return ''.join(solution_text).replace('\n\n', '\n')
+
+
+async def parse_gdz_html(soup: BeautifulSoup) -> list[str]:
+	# Url фоток с решениями
+	solutions_url: list[str] = ['https:' + div.img['src'] for div in
+	                            soup.find_all('div', class_='with-overtask')]
+
+	if not solutions_url:
+		no_solution: list[str] = ['https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
+		return no_solution
+
+	return solutions_url
+
+
+async def parse_resheba(url: str) -> str | None:
 	async with aiohttp.ClientSession() as session:
 		async with session.get(url, headers=HEADERS) as response:
 			if response.status == 404:
@@ -15,14 +34,7 @@ async def parse_resheba(url: str) -> None | str:
 
 			text = await response.text()
 			soup = BeautifulSoup(text, 'html.parser')
-
-			# Текст решения
-			solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
-
-			# return ''.join(solution_text).replace('<div class="taskText">', '').replace('</div>', '').replace('<p>',
-			# '').replace('</p>', '').replace('<strong>', '**').replace( '</strong>', '**').strip().replace('\n\n',
-			# '\n')
-			return ''.join(solution_text).replace('\n\n', '\n')
+			return await parse_resheba_html(soup)
 
 
 async def parse_gdz(url: str) -> None | list[str]:
@@ -33,16 +45,7 @@ async def parse_gdz(url: str) -> None | list[str]:
 
 			text = await response.text()
 			soup = BeautifulSoup(text, 'html.parser')
-
-			# Url фоток с решениями
-			solutions_url: list[str] = ['https:' + div.img['src'] for div in
-			                            soup.find_all('div', class_='with-overtask')]
-
-			if not solutions_url:
-				no_solution: list[str] = ['https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
-				return no_solution
-
-			return solutions_url
+			return await parse_gdz_html(soup)
 
 
 async def get_solve(book: str, page: str = None, exercise: str = None, number: str = None,
@@ -53,16 +56,14 @@ async def get_solve(book: str, page: str = None, exercise: str = None, number: s
 	subject_urls = {
 		'английский': rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{page}-s/',
 		'русский': rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{exercise}-nom/',
-
 		'алгебра-задачник': r'https://gdz.ru/class-10/algebra/reshebnik-mordkovich-a-g/{}-item-{}/'.format(
 			*(number.split('.') if number else ['', '']), None),
-
 		'геометрия': r'https://gdz.ru/class-10/geometria/atanasyan-10-11/{}-class-{}/'.format(
 			'10' if number and '.' not in number and int(number) < 400 else '11', number
 			),
-
 		'обществознание': rf'https://resheba.me/gdz/obshhestvoznanie/10-klass/soboleva/paragraph-{paragraph}',
 		}
+
 	# Название предмета (русский, алгебра и тд)
 	subject = book.split()[0].lower()
 
