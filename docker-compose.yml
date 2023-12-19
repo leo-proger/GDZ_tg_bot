@@ -2,8 +2,14 @@ version: '3.7'
 services:
   mysql:
     image: mysql
+    env_file:
+      - .env
     environment:
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - /data:/var/lib/mysql
     ports:
@@ -11,7 +17,8 @@ services:
     restart: always
   app:
     build: .
-    command: python main.py
+    env_file:
+      - .env
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
     depends_on:
