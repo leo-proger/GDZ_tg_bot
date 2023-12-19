@@ -6,22 +6,14 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 from app import config
 from app.keyboards.keyboards import book_selection_kb
-from . import selection_exercise
-from . import selection_number
-from . import selection_page
-from . import selection_paragraph
+from ..utils import get_subject_text, check_numbering, send_solution, Parser
 
 router = Router()
-router.include_routers(
-	selection_page.router,
-	selection_exercise.router,
-	selection_number.router,
-	selection_paragraph.router,
-	)
 
 
 class FormBook(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора
+	numbering = State()  # Каким образом идет нумерация учебника (параграф, страница, номер задания)
 
 
 @router.message(Command('list'))
@@ -32,41 +24,37 @@ async def book_selection(message: Message, state: FSMContext) -> None:
 
 
 @router.message(FormBook.book)
-async def page_or_exercise_selection(message: Message, state: FSMContext) -> None:
-	if message.text == config.BOOKS.get('русский'):
+async def numbering_selection(message: Message, state: FSMContext) -> None:
+	if message.text in config.BOOKS.values():
 		await state.update_data(book=message.text)
-		await state.set_state(selection_exercise.FormExercise.exercise)
+		await state.set_state(FormBook.numbering)
 
-		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
-
-	elif message.text == config.BOOKS.get('английский'):
-		await state.update_data(book=message.text)
-		await state.set_state(selection_page.FormPage.page)
-
-		await message.answer('Теперь введи страницу 📖 _(от 10 до 180 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
-
-	elif message.text == config.BOOKS.get('алгебра-задачник'):
-		await state.update_data(book=message.text)
-		await state.set_state(selection_number.FormNumber.number)
-
-		await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
-
-	elif message.text == config.BOOKS.get('геометрия'):
-		await state.update_data(book=message.text)
-		await state.set_state(selection_number.FormNumber.number)
-
-		await message.answer('Теперь введи номер задания 📖 _(от 1 до 870 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
-	elif message.text == config.BOOKS.get('обществознание'):
-		await state.update_data(book=message.text)
-		await state.set_state(selection_paragraph.FormParagraph.paragraph)
-
-		await message.answer('Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\n'
-		                     'Если у вас параграф вида _"число-число"_, то просто введите число перед дефисом',
-		                     reply_markup=ReplyKeyboardRemove())
+		subject_text = get_subject_text(message.text)
+		await message.answer(subject_text, reply_markup=ReplyKeyboardRemove())
 	else:
-		await message.reply('Такого учебника, у меня нет 😕', reply_markup=ReplyKeyboardRemove())
+		await message.reply('Такого учебника, у меня нет 😕')
 		await state.clear()
+
+
+@router.message(FormBook.numbering)
+async def get_solve(message: Message, state: FSMContext) -> None:
+	if check_numbering(message.text):
+		await state.update_data(numbering=message.text)
+		data = await state.get_data()
+
+		book = data.get('book', '')
+		numbering = data.get('numbering', '')
+
+		parser = Parser(book, numbering)
+		result = await parser.get_solution_data()
+
+		if result:
+			solution = result.get('solution')
+			title = result.get('title')
+
+			await send_solution(message, solution, title)
+			await state.clear()
+		else:
+			await message.answer('Не найдено 😕')
+	else:
+		await message.answer('Не найдено 😕')

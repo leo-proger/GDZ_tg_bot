@@ -1,14 +1,14 @@
 import os
 
-TOKEN: str = os.environ.get('BOT_TOKEN')
+TOKEN = os.environ.get('BOT_TOKEN')
 
-MYSQL_HOST: str = os.environ.get('MYSQL_HOST')
-MYSQL_USER: str = os.environ.get('MYSQL_USER')
-MYSQL_PASSWORD: str = os.environ.get('MYSQL_PASSWORD')
-MYSQL_DATABASE: str = os.environ.get('MYSQL_DATABASE')
+MYSQL_HOST = os.environ.get('MYSQL_HOST')
+MYSQL_USER = os.environ.get('MYSQL_USER')
+MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
+MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE')
 
 # Предмет -> Серия учебника -> Класс -> Авторы
-BOOKS: dict[str: str] = {
+BOOKS = {
 	'английский': 'Английский Spotlight 10 Класс В. Эванс, Д. Дули',
 	'русский': 'Русский 10-11 Класс А.И. Власенков, Л.М. Рыбченкова',
 	'алгебра-задачник': 'Алгебра-Задачник 10-11 Класс А.Г. Мордкович, П. В. Семенов',
@@ -16,16 +16,16 @@ BOOKS: dict[str: str] = {
 	'обществознание': 'Обществознание 10 Класс О.Б. Соболева, В.В. Барабанов',
 	}
 
-HEADERS: dict[str: str] = {
+HEADERS = {
 	'User-Agent': 'Mozilla/5.0',
 	}
 
-ERROR_MESSAGE_404: str = '{} не найден{}'
-ERROR_MESSAGE_500: str = 'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)'
+ERROR_MESSAGE_404 = '{} не найден{}'
+ERROR_MESSAGE_500 = 'Ой, у меня ошибка. Прошу написать ему >>> [Leo Proger](https://t.me/Leo_Proger)'
 
-GREETING_MESSAGE: str = ('Привет, ***{first_name} {last_name}***!\n\nЧтобы посмотреть доступные учебники введи /list, '
+GREETING_MESSAGE = ('Привет, ***{first_name} {last_name}***!\n\nЧтобы посмотреть доступные учебники введи /list, '
                          'чтобы получить информацию введи /help')
-GET_HELP_MESSAGE: str = '''Я - бот, созданный для облегчения поиска решения заданий с сайта gdz.ru. 
+GET_HELP_MESSAGE = '''Я - бот, созданный для облегчения поиска решения заданий с сайта gdz.ru. 
 Моя основная функция - предоставление готовых решений задач по вашему запросу.
 
 Вот как я работаю:
@@ -37,8 +37,9 @@ GET_HELP_MESSAGE: str = '''Я - бот, созданный для облегче
 ‼ Если вы найдете баги, возникнут вопросы или появятся идеи для продвижения бота, то настоятельно прошу обращаться к 
 этому человеку >>> [Leo Proger](https://t.me/Leo_Proger)'''
 
-SLEEP_TIME: int = 120
-
+SLEEP_TIME = 120
 MESSAGE_DELAY = 0.3
 
-NUMBER_PATTERN: str = r'^([1-9]|[1-3][0-9]|4[0-9]|49)\.\d+$'
+ALGEBRA_NUMBER_PATTERN = r'^([1-9]|[1-3][0-9]|4[0-9]|49)\.\d+$'
+
+PARSER_ENGINE = 'gdz.ru'
