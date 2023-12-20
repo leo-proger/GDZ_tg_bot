@@ -32,7 +32,7 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 		subject_text = get_subject_text(message.text)
 		await message.answer(subject_text, reply_markup=ReplyKeyboardRemove())
 	else:
-		await message.reply('Такого учебника, у меня нет 😕')
+		await message.reply('Такого учебника, у меня нет 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()
 
 
@@ -53,9 +53,8 @@ async def get_solve(message: Message, state: FSMContext) -> None:
 			title = result.get('title')
 
 			await send_solution(message, solution, title)
-			await state.clear()
 		else:
-			await message.answer('Не найдено 😕')
+			await message.answer('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 	else:
-		await message.answer('Не найдено 😕')
-		await state.clear()
+		await message.answer('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
+	await state.clear()
