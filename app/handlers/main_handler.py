@@ -4,14 +4,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards
 from .english import router_english
-from .russian import FormRussian, router_russian
+from .russian import router_russian, FormRussian
+from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards
+from .math import router_math, FormMath
 
 router = Router()
 router.include_routers(
 	router_english,
-	router_russian
+	router_russian,
+	router_math
 	)
 
 english_kb = EnglishKeyboards()
@@ -39,7 +41,14 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 		await state.update_data(book=message.text)
 		await state.set_state(FormRussian.exercise)
 
-		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_', reply_markup=ReplyKeyboardRemove())
+		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
+	elif subject == 'алгебра-задачник':
+		await state.update_data(book=message.text)
+		await state.set_state(FormMath.number)
+
+		await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
+		                     reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()

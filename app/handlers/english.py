@@ -17,10 +17,10 @@ class FormEnglish(StatesGroup):
 	module = State()
 
 
-@router_english.callback_query(F.data.startswith('english_module_exercise'))
-async def module_exercise_selection(callback: CallbackQuery, state: FSMContext):
+@router_english.callback_query(F.data.startswith('english_module_exercise-'))
+async def module_exercise_selection(callback: CallbackQuery, state: FSMContext) -> None:
 	data = await state.get_data()
-	module_exercise = callback.data.split()[1]
+	module_exercise = callback.data.split('-')[1]
 
 	parser = ParseEnglish(module=data.get('module'), module_exercise=module_exercise)
 	result = await parser.get_solution_data()
@@ -29,9 +29,9 @@ async def module_exercise_selection(callback: CallbackQuery, state: FSMContext):
 	await callback.answer()
 
 
-@router_english.callback_query(F.data.startswith('english_module '))
-async def module_selection(callback: CallbackQuery, state: FSMContext):
-	module = callback.data.split()[1]
+@router_english.callback_query(F.data.startswith('english_module-'))
+async def module_selection(callback: CallbackQuery, state: FSMContext) -> None:
+	module = callback.data.split('-')[1]
 	await state.update_data(module=module)
 
 	await callback.message.edit_text('Осталось выбрать упражнение из модуля',
@@ -39,9 +39,9 @@ async def module_selection(callback: CallbackQuery, state: FSMContext):
 	await callback.answer()
 
 
-@router_english.callback_query(F.data.startswith('english_'))
-async def section_selection(callback: CallbackQuery, state: FSMContext):
-	section = callback.data.split('_')[1]
+@router_english.callback_query(F.data.startswith('english-'))
+async def section_selection(callback: CallbackQuery, state: FSMContext) -> None:
+	section = callback.data.split('-')[1]
 
 	if section == 'страницы учебника':
 		await state.set_state(FormEnglish.page)

@@ -220,3 +220,21 @@ class ParseRussian:
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
+
+
+class ParseMath:
+	def __init__(self, number: str = None) -> None:
+		self.number: list = number.split('.')
+
+		self.__parse_url = 'https://gdz.ru/class-10/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.number:
+			self.__parse_url += rf'algebra/reshebnik-mordkovich-a-g/{self.number[0]}-item-{self.number[1]}/'
+			self.__title = f"{config.BOOKS.get('алгебра-задачник')}, номер {'.'.join(self.number)}"
+
+		result = await parse(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
