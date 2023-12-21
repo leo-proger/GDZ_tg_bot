@@ -188,16 +188,21 @@ class ParseEnglish:
 	async def get_solution_data(self) -> None | dict:
 		if self.page:
 			self.__parse_url += rf'english/reshebnik-spotlight-10-afanaseva-o-v/{self.page}-s/'
-			self.__title = f"{config.BOOKS.get('английский')}, страница {self.page}"
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("английский")}***\n'
+			                                       f'Раздел: ***Страницы учебника***\n'
+			                                       f'Страница: ***{self.page}***')
 		elif self.module and self.module_exercise:
 			self.__parse_url += (
 				rf'english/reshebnik-spotlight-10-afanaseva-o-v/{int(self.module) + 1}-s-{self.module_exercise}/')
-			self.__title = (f"{config.BOOKS.get('английский')}, Song Sheets, модуль {self.module}, "
-			                f"упражнение {self.module_exercise}")
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("английский")}***\n'
+			                                       f'Раздел: ***Song Sheets***\n'
+			                                       f'Модуль: ***{self.module}***\n'
+			                                       f'Упражнение: ***{self.module_exercise}***')
 		elif self.spotlight_on_russia_page:
 			self.__parse_url += rf'english/reshebnik-spotlight-10-afanaseva-o-v/1-s-{self.spotlight_on_russia_page}/'
-			self.__title = (
-				f"{config.BOOKS.get('английский')}, Spotlight on Russia, страница {self.spotlight_on_russia_page}")
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("английский")}***\n'
+			                                       f'Раздел: ***Spotlight on Russia***\n'
+			                                       f'Страница: ***{self.spotlight_on_russia_page}***')
 
 		result = await parse(self.__parse_url)
 		if not result:
@@ -215,7 +220,8 @@ class ParseRussian:
 	async def get_solution_data(self):
 		if self.exercise:
 			self.__parse_url += rf'russkii_yazik/vlasenkov-i-rybchenkova-10-11/{self.exercise}-nom/'
-			self.__title = f"{config.BOOKS.get('русский')}, упражнение {self.exercise}"
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("русский")}***\n'
+			                                       f'Упражнение: ***{self.exercise}***')
 		result = await parse(self.__parse_url)
 		if not result:
 			return None
@@ -232,7 +238,8 @@ class ParseMath:
 	async def get_solution_data(self):
 		if self.number:
 			self.__parse_url += rf'algebra/reshebnik-mordkovich-a-g/{self.number[0]}-item-{self.number[1]}/'
-			self.__title = f"{config.BOOKS.get('алгебра-задачник')}, номер {'.'.join(self.number)}"
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("алгебра-задачник")}***\n'
+			                                       f'Номер: ***{".".join(self.number)}***')
 
 		result = await parse(self.__parse_url)
 		if not result:

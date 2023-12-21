@@ -11,7 +11,7 @@ MYSQL_USER = os.environ.get('MYSQL_USER')
 MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
 MYSQL_DATABASE = os.environ.get('MYSQL_DATABASE')
 
-ALGEBRA_NUMBER_PATTERN = r'^([1-9]|[1-3][0-9]|4[0-9]|49)\.\d+$'
+ALGEBRA_NUMBER_PATTERN = r'\d+\.\d+'
 PARSER_ENGINE = 'gdz.ru'
 
 # Предмет -> Серия учебника -> Класс -> Авторы
@@ -27,6 +27,7 @@ SECTIONS = {
 	'английский spotlight 10 класс в. эванс, д. дули': ['страницы учебника', 'spotlight on russia', 'song sheets'],
 	}
 
+TITLE_MESSAGE = 'Это все, что удалось найти по запросу:\n\n'
 GET_HELP_MESSAGE = '''Я - бот, созданный для облегчения поиска решения заданий с сайта gdz.ru. 
 Моя основная функция - предоставление готовых решений задач по вашему запросу.
 
