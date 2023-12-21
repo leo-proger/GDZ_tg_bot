@@ -6,87 +6,86 @@ from aiogram.types import Message, URLInputFile
 from bs4 import BeautifulSoup
 
 from app import config
-# from app.parser import get_solve
 from main import bot
 
 
-class Parser:
-	def __init__(self, book: str, numbering: str) -> None:
-		self.book = book
-		self.numbering = numbering
-
-		self.__subject_url = ''
-		self.__parser_engine = config.PARSER_ENGINE
-
-	async def get_solution_data(self) -> None | dict[str, str]:
-		subject = self.book.split()[0].lower()
-
-		if subject == 'английский':
-			self.__subject_url = rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{self.numbering}-s/'
-		elif subject == 'русский':
-			self.__subject_url = rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{self.numbering}-nom/'
-		elif subject == 'алгебра-задачник' and re.match(config.ALGEBRA_NUMBER_PATTERN, self.numbering):
-			parts_of_number = self.numbering.split('.')
-			self.__subject_url = (
-				rf'https://gdz.ru/class-10/algebra/reshebnik-mordkovich-a-g/{parts_of_number[0]}-item-'
-				rf'{parts_of_number[1]}/')
-		elif subject == 'геометрия':
-			class_number = '10' if int(self.numbering) < 400 else '11'
-			self.__subject_url = rf'https://gdz.ru/class-10/geometria/atanasyan-10-11/{class_number}-class-{self.numbering}/'
-		elif subject == 'обществознание':
-			self.__subject_url = rf'https://resheba.me/gdz/obshhestvoznanie/10-klass/soboleva/paragraph-{self.numbering}'
-			self.__parser_engine = 'resheba.ru'
-		else:
-			return None
-
-		result = await self.__parse_solution()
-		if result:
-			return {'solution': result, 'title': get_title(self.book, self.numbering)}
-		return None
-
-	async def __parse_solution(self) -> list[str] | str | None:
-		"""Значения, которые может вернуть метод
-			list[str]: Решение в виде фотографий с сайта gdz.ru
-			str: Решение обществознания, которое берется с сайта resheba.ru
-			"""
-		if self.__subject_url:
-			if self.__parser_engine == 'gdz.ru':
-				return await self.__parse_gdz()
-			elif self.__parser_engine == 'resheba.ru':
-				return await self.__parse_resheba()
-
-	async def __parse_gdz(self) -> None | list[str]:
-		async with aiohttp.ClientSession() as session:
-			async with session.get(self.__subject_url, headers=config.HEADERS) as response:
-				if response.status == 404:
-					return None
-
-				text = await response.text()
-				soup = BeautifulSoup(text, 'html.parser')
-
-				# Url фоток с решениями
-				solutions_url: list[str] = ['https:' + div.img['src'] for div in
-				                            soup.find_all('div', class_='with-overtask')]
-
-				if not solutions_url:
-					no_solution: list[str] = [
-						'https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
-					return no_solution
-
-				return solutions_url
-
-	async def __parse_resheba(self) -> None | str:
-		async with aiohttp.ClientSession() as session:
-			async with session.get(self.__subject_url, headers=config.HEADERS) as response:
-				if response.status == 404:
-					return None
-
-				text = await response.text()
-				soup = BeautifulSoup(text, 'html.parser')
-
-				# Текст решения
-				solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
-				return ''.join(solution_text).replace('\n\n', '\n')
+# class Parser:
+# 	def __init__(self, book: str, numbering: str) -> None:
+# 		self.book = book
+# 		self.numbering = numbering
+#
+# 		self.__subject_url = ''
+# 		self.__parser_engine = config.PARSER_ENGINE
+#
+# 	async def get_solution_data(self) -> None | dict[str, str]:
+# 		subject = self.book.split()[0].lower()
+#
+# 		if subject == 'английский':
+# 			self.__subject_url = rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{self.numbering}-s/'
+# 		elif subject == 'русский':
+# 			self.__subject_url = rf'https://gdz.ru/class-10/russkii_yazik/vlasenkov-i-rybchenkova-10-11/{self.numbering}-nom/'
+# 		elif subject == 'алгебра-задачник' and re.match(config.ALGEBRA_NUMBER_PATTERN, self.numbering):
+# 			parts_of_number = self.numbering.split('.')
+# 			self.__subject_url = (
+# 				rf'https://gdz.ru/class-10/algebra/reshebnik-mordkovich-a-g/{parts_of_number[0]}-item-'
+# 				rf'{parts_of_number[1]}/')
+# 		elif subject == 'геометрия':
+# 			class_number = '10' if int(self.numbering) < 400 else '11'
+# 			self.__subject_url = rf'https://gdz.ru/class-10/geometria/atanasyan-10-11/{class_number}-class-{self.numbering}/'
+# 		elif subject == 'обществознание':
+# 			self.__subject_url = rf'https://resheba.me/gdz/obshhestvoznanie/10-klass/soboleva/paragraph-{self.numbering}'
+# 			self.__parser_engine = 'resheba.ru'
+# 		else:
+# 			return None
+#
+# 		result = await self.__parse_solution()
+# 		if result:
+# 			return {'solution': result, 'title': get_title(self.book, self.numbering)}
+# 		return None
+#
+# 	async def __parse_solution(self) -> list[str] | str | None:
+# 		"""Значения, которые может вернуть метод
+# 			list[str]: Решение в виде фотографий с сайта gdz.ru
+# 			str: Решение обществознания, которое берется с сайта resheba.ru
+# 			"""
+# 		if self.__subject_url:
+# 			if self.__parser_engine == 'gdz.ru':
+# 				return await self.__parse_gdz()
+# 			elif self.__parser_engine == 'resheba.ru':
+# 				return await self.__parse_resheba()
+#
+# 	async def __parse_gdz(self) -> None | list[str]:
+# 		async with aiohttp.ClientSession() as session:
+# 			async with session.get(self.__subject_url, headers=config.HEADERS) as response:
+# 				if response.status == 404:
+# 					return None
+#
+# 				text = await response.text()
+# 				soup = BeautifulSoup(text, 'html.parser')
+#
+# 				# Url фоток с решениями
+# 				solutions_url: list[str] = ['https:' + div.img['src'] for div in
+# 				                            soup.find_all('div', class_='with-overtask')]
+#
+# 				if not solutions_url:
+# 					no_solution: list[str] = [
+# 						'https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
+# 					return no_solution
+#
+# 				return solutions_url
+#
+# 	async def __parse_resheba(self) -> None | str:
+# 		async with aiohttp.ClientSession() as session:
+# 			async with session.get(self.__subject_url, headers=config.HEADERS) as response:
+# 				if response.status == 404:
+# 					return None
+#
+# 				text = await response.text()
+# 				soup = BeautifulSoup(text, 'html.parser')
+#
+# 				# Текст решения
+# 				solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
+# 				return ''.join(solution_text).replace('\n\n', '\n')
 
 
 def get_title(book: str, numbering: str) -> str | None:
@@ -107,6 +106,7 @@ async def send_solution(message: Message, solution: list[str] | str, title: str)
 	if isinstance(solution, str):
 		for text in split_text(solution):
 			await message.answer(text)
+			await asyncio.sleep(config.MESSAGE_DELAY)
 	else:
 		for url in solution:
 			image = URLInputFile(url, filename=title)
@@ -156,3 +156,58 @@ def check_numbering(text: str) -> bool:
 	if text.isnumeric() or re.match(config.ALGEBRA_NUMBER_PATTERN, text):
 		return True
 	return False
+
+
+async def parse(parse_url) -> None | list[str]:
+	async with aiohttp.ClientSession() as session:
+		async with session.get(parse_url, headers=config.HEADERS) as response:
+			if response.status == 404:
+				return None
+
+			text = await response.text()
+			# TODO: Попробовать сделать асинхронным
+			soup = BeautifulSoup(text, 'html.parser')
+
+			# Url фоток с решениями
+			solutions_url: list[str] = ['https:' + div.img['src'] for div in
+			                            soup.find_all('div', class_='with-overtask')]
+
+			if not solutions_url:
+				no_solution: list[str] = [
+					'https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
+				return no_solution
+
+			return solutions_url
+
+
+class ParseEnglish:
+	def __init__(self, page: str = None, module: str = None, module_exercise: str = None,
+	             spotlight_on_russia_page: str = None) -> None:
+		self.page = page
+		self.module = module
+		self.module_exercise = module_exercise
+		self.spotlight_on_russia_page = spotlight_on_russia_page
+
+		self.__parse_url = ''
+		self.__title = ''
+		self.__parser_engine = config.PARSER_ENGINE
+
+	async def get_solution_data(self) -> None | dict:
+		if self.page:
+			self.__parse_url = rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{self.page}-s/'
+			self.__title = f"{config.BOOKS.get('английский')}, страница {self.page}"
+		elif self.module and self.module_exercise:
+			self.__parse_url = (rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/'
+			                    rf'{int(self.module) + 1}-s-{self.module_exercise}/')
+			self.__title = (f"{config.BOOKS.get('английский')}, Song Sheets, модуль {self.module}, "
+			                f"упражнение {self.module_exercise}")
+		elif self.spotlight_on_russia_page:
+			self.__parse_url = (rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/'
+			                    rf'1-s-{self.spotlight_on_russia_page}/')
+			self.__title = (
+				f"{config.BOOKS.get('английский')}, Spotlight on Russia, страница {self.spotlight_on_russia_page}")
+
+		result = await parse(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
