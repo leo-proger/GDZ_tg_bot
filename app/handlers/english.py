@@ -6,9 +6,9 @@ from aiogram.types import Message, CallbackQuery
 from app.keyboards.keyboards import EnglishKeyboards, book_selection_kb
 from app.utils import ParseEnglish, send_solution
 
-english_router = Router()
+router_english = Router()
 
-english_kb = EnglishKeyboards()
+kb_english = EnglishKeyboards()
 
 
 class FormEnglish(StatesGroup):
@@ -17,34 +17,29 @@ class FormEnglish(StatesGroup):
 	module = State()
 
 
-@english_router.callback_query(F.data.startswith('english_module_exercise'))
+@router_english.callback_query(F.data.startswith('english_module_exercise'))
 async def module_exercise_selection(callback: CallbackQuery, state: FSMContext):
 	data = await state.get_data()
-
 	module_exercise = callback.data.split()[1]
 
 	parser = ParseEnglish(module=data.get('module'), module_exercise=module_exercise)
 	result = await parser.get_solution_data()
 
-	if result:
-		solution = result.get('solution')
-		title = result.get('title')
-
-		await send_solution(callback.message, solution, title)
+	await send_solution(callback.message, result, state)
 	await callback.answer()
 
 
-@english_router.callback_query(F.data.startswith('english_module '))
+@router_english.callback_query(F.data.startswith('english_module '))
 async def module_selection(callback: CallbackQuery, state: FSMContext):
 	module = callback.data.split()[1]
 	await state.update_data(module=module)
 
 	await callback.message.edit_text('Осталось выбрать упражнение из модуля',
-	                                 reply_markup=english_kb.module_exercise_selection_kb())
+	                                 reply_markup=kb_english.module_exercise_selection_kb())
 	await callback.answer()
 
 
-@english_router.callback_query(F.data.startswith('english_'))
+@router_english.callback_query(F.data.startswith('english_'))
 async def section_selection(callback: CallbackQuery, state: FSMContext):
 	section = callback.data.split('_')[1]
 
@@ -59,11 +54,11 @@ async def section_selection(callback: CallbackQuery, state: FSMContext):
 	elif section == 'song sheets':
 		await state.set_state(FormEnglish.module)
 		await callback.message.edit_text('Теперь выбери модуль 📖 _(от 1 до 8 включительно)_',
-		                                 reply_markup=english_kb.module_selection_kb())
+		                                 reply_markup=kb_english.module_selection_kb())
 	await callback.answer()
 
 
-@english_router.message(FormEnglish.page)
+@router_english.message(FormEnglish.page)
 async def page_selection(message: Message, state: FSMContext) -> None:
 	if message.text.isnumeric():
 		await state.update_data(page=message.text)
@@ -71,20 +66,13 @@ async def page_selection(message: Message, state: FSMContext) -> None:
 		parser = ParseEnglish(page=message.text)
 		result = await parser.get_solution_data()
 
-		if result:
-			solution = result.get('solution')
-			title = result.get('title')
-
-			await send_solution(message, solution, title)
-		else:
-			await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
-			await state.clear()
+		await send_solution(message, result, state)
 	else:
 		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
 		await state.clear()
 
 
-@english_router.message(FormEnglish.spotlight_on_russia_page)
+@router_english.message(FormEnglish.spotlight_on_russia_page)
 async def spotlight_on_russia_page_selection(message: Message, state: FSMContext) -> None:
 	if message.text.isnumeric():
 		await state.update_data(spotlight_on_russia_page=message.text)
@@ -92,14 +80,7 @@ async def spotlight_on_russia_page_selection(message: Message, state: FSMContext
 		parser = ParseEnglish(spotlight_on_russia_page=message.text)
 		result = await parser.get_solution_data()
 
-		if result:
-			solution = result.get('solution')
-			title = result.get('title')
-
-			await send_solution(message, solution, title)
-		else:
-			await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
-			await state.clear()
+		await send_solution(message, result, state)
 	else:
 		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
 		await state.clear()

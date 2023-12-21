@@ -18,15 +18,19 @@ def book_selection_kb() -> ReplyKeyboardMarkup:
 class EnglishKeyboards:
 	@staticmethod
 	def section_selection_kb(book: str) -> InlineKeyboardMarkup:
+		sections = config.SECTIONS.get(book.lower())
 		builder = InlineKeyboardBuilder()
 
-		for section in config.SECTIONS.get(book.lower()):
-			builder.add(
-				InlineKeyboardButton(
-					text=section.capitalize(),
-					callback_data='english_' + section
-					)
-				)
+		# Добавляем первую кнопку в отдельный массив
+		last_button = [
+			InlineKeyboardButton(text=sections[0].capitalize(), callback_data='english_' + sections[0])]
+
+		# Добавляем остальные кнопки в другой массив
+		other_buttons = [InlineKeyboardButton(text=section.capitalize(), callback_data='english_' + section) for
+		                 section in sections[1:]]
+
+		builder.row(*other_buttons)
+		builder.row(*last_button)
 		return builder.as_markup()
 
 	@staticmethod

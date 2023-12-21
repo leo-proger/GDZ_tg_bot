@@ -2,10 +2,12 @@ import asyncio
 import re
 
 import aiohttp
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, URLInputFile
 from bs4 import BeautifulSoup
 
 from app import config
+from app.keyboards.keyboards import book_selection_kb
 from main import bot
 
 
@@ -88,34 +90,25 @@ from main import bot
 # 				return ''.join(solution_text).replace('\n\n', '\n')
 
 
-def get_title(book: str, numbering: str) -> str | None:
-	subject = book.split()[0].lower()
-
-	title_formats = {
-		'английский': f'{book}, страница {numbering}',
-		'русский': f'{book}, упражнение {numbering}',
-		'алгебра-задачник': f'{book}, номер {numbering}',
-		'геометрия': f'{book}, номер {numbering}',
-		'обществознание': f'{book}, параграф §{numbering}'
-		}
-
-	return title_formats.get(subject, None)
-
-
-async def send_solution(message: Message, solution: list[str] | str, title: str) -> None:
-	if isinstance(solution, str):
-		for text in split_text(solution):
-			await message.answer(text)
-			await asyncio.sleep(config.MESSAGE_DELAY)
+async def send_solution(message: Message, result: dict | None, state: FSMContext) -> None:
+	if not result:
+		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
+		await state.clear()
 	else:
-		for url in solution:
-			image = URLInputFile(url, filename=title)
-			await bot.send_photo(chat_id=message.chat.id, photo=image)
+		solution, title = result.get('solution'), result.get('title')
+		if isinstance(solution, str):
+			for text in split_text(solution):
+				await message.answer(text)
+				await asyncio.sleep(config.MESSAGE_DELAY)
+		elif isinstance(solution, list):
+			for url in solution:
+				image = URLInputFile(url, filename=title)
+				await bot.send_photo(chat_id=message.chat.id, photo=image)
 
-			# Задержка после отправки, чтобы телеграм не выдавал ошибку
-			await asyncio.sleep(config.MESSAGE_DELAY)
+				# Задержка после отправки, чтобы телеграм не выдавал ошибку
+				await asyncio.sleep(config.MESSAGE_DELAY)
 
-		await message.answer(title)
+			await message.answer(title)
 
 
 def split_text(text: str, max_length: int = 4096):
@@ -188,25 +181,41 @@ class ParseEnglish:
 		self.module_exercise = module_exercise
 		self.spotlight_on_russia_page = spotlight_on_russia_page
 
-		self.__parse_url = ''
+		self.__parse_url = 'https://gdz.ru/class-10/'
 		self.__title = ''
 		self.__parser_engine = config.PARSER_ENGINE
 
 	async def get_solution_data(self) -> None | dict:
 		if self.page:
-			self.__parse_url = rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/{self.page}-s/'
+			self.__parse_url += rf'english/reshebnik-spotlight-10-afanaseva-o-v/{self.page}-s/'
 			self.__title = f"{config.BOOKS.get('английский')}, страница {self.page}"
 		elif self.module and self.module_exercise:
-			self.__parse_url = (rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/'
-			                    rf'{int(self.module) + 1}-s-{self.module_exercise}/')
+			self.__parse_url += (
+				rf'english/reshebnik-spotlight-10-afanaseva-o-v/{int(self.module) + 1}-s-{self.module_exercise}/')
 			self.__title = (f"{config.BOOKS.get('английский')}, Song Sheets, модуль {self.module}, "
 			                f"упражнение {self.module_exercise}")
 		elif self.spotlight_on_russia_page:
-			self.__parse_url = (rf'https://gdz.ru/class-10/english/reshebnik-spotlight-10-afanaseva-o-v/'
-			                    rf'1-s-{self.spotlight_on_russia_page}/')
+			self.__parse_url += rf'english/reshebnik-spotlight-10-afanaseva-o-v/1-s-{self.spotlight_on_russia_page}/'
 			self.__title = (
 				f"{config.BOOKS.get('английский')}, Spotlight on Russia, страница {self.spotlight_on_russia_page}")
 
+		result = await parse(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
+
+
+class ParseRussian:
+	def __init__(self, exercise: str = None) -> None:
+		self.exercise = exercise
+
+		self.__parse_url = 'https://gdz.ru/class-10/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.exercise:
+			self.__parse_url += rf'russkii_yazik/vlasenkov-i-rybchenkova-10-11/{self.exercise}-nom/'
+			self.__title = f"{config.BOOKS.get('русский')}, упражнение {self.exercise}"
 		result = await parse(self.__parse_url)
 		if not result:
 			return None

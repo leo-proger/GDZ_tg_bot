@@ -4,15 +4,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from app import config
-from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards
-from main import bot
-
-from .english import FormEnglish, english_router
+from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards
+from .english import router_english
+from .russian import FormRussian, router_russian
 
 router = Router()
 router.include_routers(
-	english_router,
+	router_english,
+	router_russian
 	)
 
 english_kb = EnglishKeyboards()
@@ -35,10 +34,14 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 
 	if subject == 'английский':
 		await state.update_data(book=message.text)
+		await message.answer('Теперь выбери раздел', reply_markup=english_kb.section_selection_kb(message.text))
+	elif subject == 'русский':
+		await state.update_data(book=message.text)
+		await state.set_state(FormRussian.exercise)
 
-		await message.answer('Теперь выбери раздел 📑', reply_markup=english_kb.section_selection_kb(message.text))
+		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_', reply_markup=ReplyKeyboardRemove())
 	else:
-		await message.reply('Такого учебника, у меня нет 😕', reply_markup=ReplyKeyboardRemove())
+		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()
 
 # @router.message(FormBook.numbering)
