@@ -96,7 +96,8 @@ class GeometryKeyboards:
 	def page_selection_kb() -> InlineKeyboardMarkup:
 		builder = InlineKeyboardBuilder()
 
-		pages = [InlineKeyboardButton(text=str(page), callback_data=f'geometry_page-{page}') for page in range(229, 236, 2)]
+		pages = [InlineKeyboardButton(text=str(page), callback_data=f'geometry_page-{page}') for page in
+		         range(229, 236, 2)]
 		builder.add(*pages)
 		builder.add(InlineKeyboardButton(text='236', callback_data='geometry_page-236'))
 
