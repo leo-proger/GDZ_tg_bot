@@ -36,13 +36,7 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 	if subject == 'английский':
 		await state.update_data(book=message.text)
 
-		# Отправляем сообщение с клавиатурой для удаления
-		bot_message = await message.answer('Теперь выбери раздел 📑', reply_markup=ReplyKeyboardRemove())
-
-		# Затем редактируем сообщение с обновленной клавиатурой
-		await bot.edit_message_text('Теперь выбери раздел 📑', chat_id=message.chat.id,
-		                            message_id=bot_message.message_id,
-		                            reply_markup=english_kb.section_selection_kb(message.text))
+		await message.answer('Теперь выбери раздел 📑', reply_markup=english_kb.section_selection_kb(message.text))
 	else:
 		await message.reply('Такого учебника, у меня нет 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()
