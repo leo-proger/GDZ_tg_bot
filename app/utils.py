@@ -108,7 +108,7 @@ async def send_solution(message: Message, result: dict | None, state: FSMContext
 				# Задержка после отправки, чтобы телеграм не выдавал ошибку
 				await asyncio.sleep(config.MESSAGE_DELAY)
 
-			await message.answer(title)
+		await message.answer(title)
 
 
 def split_text(text: str, max_length: int = 4096):
@@ -151,7 +151,7 @@ def check_numbering(text: str) -> bool:
 	return False
 
 
-async def parse(parse_url) -> None | list[str]:
+async def parse_gdz(parse_url) -> None | list[str]:
 	async with aiohttp.ClientSession() as session:
 		async with session.get(parse_url, headers=config.HEADERS) as response:
 			if response.status == 404:
@@ -171,6 +171,20 @@ async def parse(parse_url) -> None | list[str]:
 				return no_solution
 
 			return solutions_url
+
+
+async def parse_resheba(parse_url) -> None | str:
+	async with aiohttp.ClientSession() as session:
+		async with session.get(parse_url, headers=config.HEADERS) as response:
+			if response.status == 404:
+				return None
+
+			text = await response.text()
+			soup = BeautifulSoup(text, 'html.parser')
+
+			# Текст решения
+			solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
+			return ''.join(solution_text).replace('\n\n', '\n')
 
 
 class ParseEnglish:
@@ -204,7 +218,7 @@ class ParseEnglish:
 			                                       f'Раздел: ***Spotlight on Russia***\n'
 			                                       f'Страница: ***{self.spotlight_on_russia_page}***')
 
-		result = await parse(self.__parse_url)
+		result = await parse_gdz(self.__parse_url)
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
@@ -222,7 +236,7 @@ class ParseRussian:
 			self.__parse_url += rf'russkii_yazik/vlasenkov-i-rybchenkova-10-11/{self.exercise}-nom/'
 			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("русский")}***\n'
 			                                       f'Упражнение: ***{self.exercise}***')
-		result = await parse(self.__parse_url)
+		result = await parse_gdz(self.__parse_url)
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
@@ -241,7 +255,7 @@ class ParseMath:
 			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("алгебра-задачник")}***\n'
 			                                       f'Номер: ***{".".join(self.number)}***')
 
-		result = await parse(self.__parse_url)
+		result = await parse_gdz(self.__parse_url)
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
@@ -283,7 +297,25 @@ class ParseGeometry:
 			self.__parse_url += rf'geometria/atanasyan-10-11/res-{self.research_number}/'
 			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
 			                                       f'Задача: ***{self.research_number}***')
-		result = await parse(self.__parse_url)
+		result = await parse_gdz(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
+
+
+class ParseSociology:
+	def __init__(self, paragraph: str = None) -> None:
+		self.paragraph = paragraph
+
+		self.__parse_url = 'https://resheba.me/gdz/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.paragraph:
+			self.__parse_url += rf'obshhestvoznanie/10-klass/soboleva/paragraph-{self.paragraph}'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("обществознание")}***\n'
+			                                       f'Параграф: ***{self.paragraph}***')
+		result = await parse_resheba(self.__parse_url)
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}

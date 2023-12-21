@@ -5,9 +5,10 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from .english import router_english
+from .geometry import router_geometry
 from .math import router_math, FormMath
 from .russian import router_russian, FormRussian
-from .geometry import router_geometry
+from .sociology import router_sociology, FormSociology
 from .. import config
 from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
 
@@ -17,6 +18,7 @@ router.include_routers(
 	router_russian,
 	router_math,
 	router_geometry,
+	router_sociology,
 	)
 
 english_kb = EnglishKeyboards()
@@ -41,7 +43,8 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 		await state.update_data(book=message.text)
 
 		if subject == 'английский':
-			await message.answer('Теперь выбери раздел учебника', reply_markup=english_kb.section_selection_kb(message.text))
+			await message.answer('Теперь выбери раздел учебника',
+			                     reply_markup=english_kb.section_selection_kb(message.text))
 		elif subject == 'русский':
 			await state.set_state(FormRussian.exercise)
 
@@ -53,7 +56,14 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 			await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
 			                     reply_markup=ReplyKeyboardRemove())
 		elif subject == 'геометрия':
-			await message.answer('Теперь выбери раздел учебника', reply_markup=geometry_kb.section_selection_kb(message.text))
+			await message.answer('Теперь выбери раздел учебника',
+			                     reply_markup=geometry_kb.section_selection_kb(message.text))
+		elif subject == 'обществознание':
+			await state.set_state(FormSociology.paragraph)
+			await message.answer(
+				'Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\nЕсли у вас параграф вида '
+				'_"число-число"_, то просто введите число перед дефисом',
+				reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()

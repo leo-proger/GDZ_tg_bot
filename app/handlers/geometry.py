@@ -47,7 +47,7 @@ async def page_selection(callback: CallbackQuery, state: FSMContext) -> None:
 
 
 @router_geometry.callback_query(F.data.startswith('geometry_chapter-'))
-async def section_selection(callback: CallbackQuery, state: FSMContext) -> None:
+async def parse_chapter(callback: CallbackQuery, state: FSMContext) -> None:
 	await state.update_data(chapter_question=callback.data)
 	chapter = callback.data.split('-')[1]
 
@@ -111,7 +111,7 @@ async def parse_math_number(message: Message, state: FSMContext) -> None:
 
 
 @router_geometry.message(FormGeometry.research_number)
-async def parse_math_number(message: Message, state: FSMContext) -> None:
+async def parse_research_number(message: Message, state: FSMContext) -> None:
 	if message.text.isnumeric():
 		await state.update_data(research_number=message.text)
 
