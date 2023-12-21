@@ -43,15 +43,15 @@ async def module_selection(callback: CallbackQuery, state: FSMContext) -> None:
 async def section_selection(callback: CallbackQuery, state: FSMContext) -> None:
 	section = callback.data.split('-')[1]
 
-	if section == 'страницы учебника':
+	if section == 'Страницы учебника':
 		await state.set_state(FormEnglish.page)
 		await callback.message.edit_text('Теперь выбери страницу учебника 📖 _(от 10 до 180 включительно)_',
 		                                 reply_markup=None)
-	elif section == 'spotlight on russia':
+	elif section == 'Spotlight on Russia':
 		await state.set_state(FormEnglish.spotlight_on_russia_page)
 		await callback.message.edit_text('Теперь выбери страницу раздела 📖 _(от 2 до 10 включительно)_',
 		                                 reply_markup=None)
-	elif section == 'song sheets':
+	elif section == 'Song sheets':
 		await state.set_state(FormEnglish.module)
 		await callback.message.edit_text('Теперь выбери модуль 📖 _(от 1 до 8 включительно)_',
 		                                 reply_markup=kb_english.module_selection_kb())

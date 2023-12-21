@@ -21,16 +21,11 @@ class EnglishKeyboards:
 		sections = config.SECTIONS.get(book.lower())
 		builder = InlineKeyboardBuilder()
 
-		# Добавляем последнюю кнопку в отдельный массив
-		last_button = [
-			InlineKeyboardButton(text=sections[0], callback_data='english-' + sections[0])]
+		sections_buttons = [InlineKeyboardButton(text=section, callback_data=f'english-{section}') for section in
+		                    sections]
 
-		# Добавляем остальные кнопки в другой массив
-		other_buttons = [InlineKeyboardButton(text=section, callback_data='english-' + section)
-		                 for section in sections[1:]]
-
-		builder.row(*other_buttons)
-		builder.row(*last_button)
+		builder.add(*sections_buttons)
+		builder.adjust(2)
 		return builder.as_markup()
 
 	@staticmethod
