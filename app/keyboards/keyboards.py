@@ -23,11 +23,11 @@ class EnglishKeyboards:
 
 		# Добавляем последнюю кнопку в отдельный массив
 		last_button = [
-			InlineKeyboardButton(text=sections[0].capitalize(), callback_data='english-' + sections[0])]
+			InlineKeyboardButton(text=sections[0], callback_data='english-' + sections[0])]
 
 		# Добавляем остальные кнопки в другой массив
-		other_buttons = [InlineKeyboardButton(text=section.capitalize(), callback_data='english-' + section) for
-		                 section in sections[1:]]
+		other_buttons = [InlineKeyboardButton(text=section, callback_data='english-' + section)
+		                 for section in sections[1:]]
 
 		builder.row(*other_buttons)
 		builder.row(*last_button)
@@ -59,4 +59,46 @@ class EnglishKeyboards:
 					)
 				)
 		builder.adjust(2)
+		return builder.as_markup()
+
+
+class GeometryKeyboards:
+	@staticmethod
+	def section_selection_kb(book: str) -> InlineKeyboardMarkup:
+		sections = config.SECTIONS.get(book.lower())
+		builder = InlineKeyboardBuilder()
+
+		for section in sections:
+			builder.add(
+				InlineKeyboardButton(
+					text=section,
+					callback_data='geometry_section-' + section
+					)
+				)
+		builder.adjust(2)
+		return builder.as_markup()
+
+	@staticmethod
+	def chapter_selection_kb() -> InlineKeyboardMarkup:
+		builder = InlineKeyboardBuilder()
+
+		for chapter in range(1, 7):
+			builder.add(
+				InlineKeyboardButton(
+					text=str(chapter),
+					callback_data='geometry_chapter-' + str(chapter)
+					)
+				)
+		builder.adjust(3)
+		return builder.as_markup()
+
+	@staticmethod
+	def page_selection_kb() -> InlineKeyboardMarkup:
+		builder = InlineKeyboardBuilder()
+
+		pages = [InlineKeyboardButton(text=str(page), callback_data=f'geometry_page-{page}') for page in range(229, 236, 2)]
+		builder.add(*pages)
+		builder.add(InlineKeyboardButton(text='236', callback_data='geometry_page-236'))
+
+		builder.adjust(3)
 		return builder.as_markup()

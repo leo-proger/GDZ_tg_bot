@@ -245,3 +245,45 @@ class ParseMath:
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
+
+
+class ParseGeometry:
+	def __init__(self, number: str = None, chapter: str = None, page: str = None, exercise_to_page: str = None,
+	             math_number: str = None, research_number: str = None) -> None:
+		self.number = number
+		self.chapter = chapter
+		self.page = page
+		self.exercise_to_page = exercise_to_page
+		self.math_number = math_number
+		self.research_number = research_number
+
+		self.__class = '10' if number and int(number) < 400 else '11'
+		self.__parse_url = 'https://gdz.ru/class-10/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.number:
+			self.__parse_url += rf'geometria/atanasyan-10-11/{self.__class}-class-{self.number}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
+			                                       f'Номер: ***{self.number}***')
+		elif self.chapter:
+			self.__parse_url += rf'geometria/atanasyan-10-11/vorosi-{self.chapter}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
+			                                       f'Глава: ***{self.chapter}***')
+		elif self.page and self.exercise_to_page:
+			self.__parse_url += rf'geometria/atanasyan-10-11/ege-{self.page}-{self.exercise_to_page}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
+			                                       f'Страница: ***{self.page}***\n'
+			                                       f'Задача: ***{self.exercise_to_page}***')
+		elif self.math_number:
+			self.__parse_url += rf'geometria/atanasyan-10-11/math-{self.math_number}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
+			                                       f'Задача: ***{self.math_number}***')
+		elif self.research_number:
+			self.__parse_url += rf'geometria/atanasyan-10-11/res-{self.research_number}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("геометрия")}***\n'
+			                                       f'Задача: ***{self.research_number}***')
+		result = await parse(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}

@@ -5,18 +5,22 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from .english import router_english
-from .russian import router_russian, FormRussian
-from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards
 from .math import router_math, FormMath
+from .russian import router_russian, FormRussian
+from .geometry import router_geometry
+from .. import config
+from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
 
 router = Router()
 router.include_routers(
 	router_english,
 	router_russian,
-	router_math
+	router_math,
+	router_geometry,
 	)
 
 english_kb = EnglishKeyboards()
+geometry_kb = GeometryKeyboards()
 
 
 class MainForm(StatesGroup):
@@ -33,22 +37,23 @@ async def book_selection(message: Message, state: FSMContext) -> None:
 @router.message(MainForm.book)
 async def numbering_selection(message: Message, state: FSMContext) -> None:
 	subject = message.text.split(' ', 1)[0].lower()
-
-	if subject == 'английский':
+	if subject in config.BOOKS.keys():
 		await state.update_data(book=message.text)
-		await message.answer('Теперь выбери раздел', reply_markup=english_kb.section_selection_kb(message.text))
-	elif subject == 'русский':
-		await state.update_data(book=message.text)
-		await state.set_state(FormRussian.exercise)
 
-		await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
-	elif subject == 'алгебра-задачник':
-		await state.update_data(book=message.text)
-		await state.set_state(FormMath.number)
+		if subject == 'английский':
+			await message.answer('Теперь выбери раздел учебника', reply_markup=english_kb.section_selection_kb(message.text))
+		elif subject == 'русский':
+			await state.set_state(FormRussian.exercise)
 
-		await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
-		                     reply_markup=ReplyKeyboardRemove())
+			await message.answer('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
+			                     reply_markup=ReplyKeyboardRemove())
+		elif subject == 'алгебра-задачник':
+			await state.set_state(FormMath.number)
+
+			await message.answer('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
+			                     reply_markup=ReplyKeyboardRemove())
+		elif subject == 'геометрия':
+			await message.answer('Теперь выбери раздел учебника', reply_markup=geometry_kb.section_selection_kb(message.text))
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()

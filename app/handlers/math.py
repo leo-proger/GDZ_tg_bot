@@ -17,7 +17,7 @@ class FormMath(StatesGroup):
 
 
 @router_math.message(FormMath.number)
-async def number_selection(message: Message, state: FSMContext) -> None:
+async def parse_number(message: Message, state: FSMContext) -> None:
 	if re.match(config.ALGEBRA_NUMBER_PATTERN, message.text):
 		await state.update_data(number=message.text)
 

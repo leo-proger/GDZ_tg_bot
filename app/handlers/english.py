@@ -18,7 +18,7 @@ class FormEnglish(StatesGroup):
 
 
 @router_english.callback_query(F.data.startswith('english_module_exercise-'))
-async def module_exercise_selection(callback: CallbackQuery, state: FSMContext) -> None:
+async def parse_module_exercise(callback: CallbackQuery, state: FSMContext) -> None:
 	data = await state.get_data()
 	module_exercise = callback.data.split('-')[1]
 
@@ -59,7 +59,7 @@ async def section_selection(callback: CallbackQuery, state: FSMContext) -> None:
 
 
 @router_english.message(FormEnglish.page)
-async def page_selection(message: Message, state: FSMContext) -> None:
+async def parse_page(message: Message, state: FSMContext) -> None:
 	if message.text.isnumeric():
 		await state.update_data(page=message.text)
 
@@ -73,7 +73,7 @@ async def page_selection(message: Message, state: FSMContext) -> None:
 
 
 @router_english.message(FormEnglish.spotlight_on_russia_page)
-async def spotlight_on_russia_page_selection(message: Message, state: FSMContext) -> None:
+async def parse_spotlight_on_russia_page(message: Message, state: FSMContext) -> None:
 	if message.text.isnumeric():
 		await state.update_data(spotlight_on_russia_page=message.text)
 
