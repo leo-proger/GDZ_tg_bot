@@ -130,27 +130,6 @@ def split_text(text: str, max_length: int = 4096):
 	return parts
 
 
-def get_subject_text(book: str) -> str:
-	subject = book.split()[0].lower()
-
-	subject_messages = {
-		'английский': 'Теперь введи страницу 📖 _(от 10 до 180 включительно)_',
-		'русский': 'Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
-		'алгебра-задачник': 'Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
-		'геометрия': 'Теперь введи номер задания 📖 _(от 1 до 870 включительно)_',
-		'обществознание': ('Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\nЕсли у вас параграф вида '
-		                   '_"число-число"_, то просто введите число перед дефисом')
-		}
-
-	return subject_messages.get(subject, '')
-
-
-def check_numbering(text: str) -> bool:
-	if text.isnumeric() or re.match(config.ALGEBRA_NUMBER_PATTERN, text):
-		return True
-	return False
-
-
 async def parse_gdz(parse_url) -> None | list[str]:
 	async with aiohttp.ClientSession() as session:
 		async with session.get(parse_url, headers=config.HEADERS) as response:
@@ -316,6 +295,31 @@ class ParseSociology:
 			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("обществознание")}***\n'
 			                                       f'Параграф: ***{self.paragraph}***')
 		result = await parse_resheba(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
+
+
+class ParsePhysics:
+	def __init__(self, question: str = None, exercise: str = None) -> None:
+		self.question = question.split('.') if question else None
+		self.exercise = exercise.split('.') if exercise else None
+
+		self.__parse_url = 'https://gdz.ru/class-10/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.question:
+			self.__parse_url += rf'fizika/myakishev-10-izdanie/{self.question[0]}-quest-{self.question[1]}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("физика")}***\n'
+			                                       f'Параграф: ***{self.question[0]}***\n'
+			                                       f'Вопрос: ***{self.question[1]}***')
+		elif self.exercise:
+			self.__parse_url += rf'fizika/myakishev-10-izdanie/{self.exercise[0]}-nom-{self.exercise[1]}/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("физика")}***\n'
+			                                       f'Упражнение: ***{self.exercise[0]}***\n'
+			                                       f'Задание: ***{self.exercise[1]}***')
+		result = await parse_gdz(self.__parse_url)
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}

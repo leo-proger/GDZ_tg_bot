@@ -98,3 +98,20 @@ class GeometryKeyboards:
 
 		builder.adjust(3)
 		return builder.as_markup()
+
+
+class PhysicsKeyboards:
+	@staticmethod
+	def section_selection_kb(book: str) -> InlineKeyboardMarkup:
+		sections = config.SECTIONS.get(book.lower())
+		builder = InlineKeyboardBuilder()
+
+		for section in sections:
+			builder.add(
+				InlineKeyboardButton(
+					text=section,
+					callback_data='physics_section-' + section
+					)
+				)
+		builder.adjust(1)
+		return builder.as_markup()

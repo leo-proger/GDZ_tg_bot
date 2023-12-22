@@ -7,10 +7,11 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from .english import router_english
 from .geometry import router_geometry
 from .math import router_math, FormMath
+from .physics import router_physics, FormPhysics
 from .russian import router_russian, FormRussian
 from .sociology import router_sociology, FormSociology
 from .. import config
-from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
+from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
 
 router = Router()
 router.include_routers(
@@ -19,10 +20,12 @@ router.include_routers(
 	router_math,
 	router_geometry,
 	router_sociology,
+	router_physics,
 	)
 
 english_kb = EnglishKeyboards()
 geometry_kb = GeometryKeyboards()
+physics_kb = PhysicsKeyboards()
 
 
 class MainForm(StatesGroup):
@@ -36,6 +39,7 @@ async def book_selection(message: Message, state: FSMContext) -> None:
 	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
 
 
+# TODO: Сделать рефакторинг utils.py, файлов с предметами, keyboards.py
 @router.message(MainForm.book)
 async def numbering_selection(message: Message, state: FSMContext) -> None:
 	subject = message.text.split(' ', 1)[0].lower()
@@ -64,6 +68,9 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 				'Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\nЕсли у вас параграф вида '
 				'_"число-число"_, то просто введите число перед дефисом',
 				reply_markup=ReplyKeyboardRemove())
+		elif subject == 'физика':
+			await message.answer('Теперь выбери раздел учебника',
+			                     reply_markup=physics_kb.section_selection_kb(message.text))
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()
