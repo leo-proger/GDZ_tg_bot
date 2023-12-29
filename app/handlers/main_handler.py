@@ -39,7 +39,6 @@ async def book_selection(message: Message, state: FSMContext) -> None:
 	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
 
 
-# TODO: Сделать рефакторинг utils.py, файлов с предметами, keyboards.py
 @router.message(MainForm.book)
 async def numbering_selection(message: Message, state: FSMContext) -> None:
 	subject = message.text.split(' ', 1)[0].lower()
@@ -69,8 +68,11 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 				'_"число-число"_, то просто введите число перед дефисом',
 				reply_markup=ReplyKeyboardRemove())
 		elif subject == 'физика':
-			await message.answer('Теперь выбери раздел учебника',
-			                     reply_markup=physics_kb.section_selection_kb(message.text))
+			await state.set_state(FormPhysics.book)
+			await state.update_data(book=message.text)
+			await state.set_state(FormPhysics.paragraph)
+
+			await message.answer('Теперь введи параграф', reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()

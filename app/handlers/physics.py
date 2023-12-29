@@ -15,6 +15,8 @@ kb_physics = PhysicsKeyboards()
 
 
 class FormPhysics(StatesGroup):
+	book = State()
+	paragraph = State()
 	question = State()
 	exercise = State()
 
@@ -23,26 +25,27 @@ class FormPhysics(StatesGroup):
 async def section_selection(callback: CallbackQuery, state: FSMContext) -> None:
 	section = callback.data.split('-')[1]
 
-	if section == 'Вопросы после параграфа':
+	if section == 'Вопросы':
 		await state.set_state(FormPhysics.question)
 		await callback.message.edit_text(
-			'Теперь введи _параграф.номер вопроса_. Пример: Параграф - 9, Вопрос - 2. Значит вы вводите: _9.2_',
+			'Теперь введи номер вопроса',
 			reply_markup=None)
-	elif section == 'Упражнения':
+	elif section == 'Образцы заданий ЕГЭ':
 		await state.set_state(FormPhysics.exercise)
 		await callback.message.edit_text(
-			'Теперь введи _номер упражнения.номер задания_. Пример: Номер упражнения - 4, Номер задания - 1. '
-			'Значит вы вводите: _4.1_',
+			'Теперь введи номер задания',
 			reply_markup=None)
 	await callback.answer()
 
 
 @router_physics.message(FormPhysics.question)
 async def parse_question(message: Message, state: FSMContext) -> None:
-	if re.match(config.FLOAT_NUMBER_PATTERN, message.text):
+	if message.text.isnumeric():
 		await state.update_data(question=message.text)
+		data = await state.get_data()
+		paragraph = data.get('paragraph')
 
-		parser = ParsePhysics(question=message.text)
+		parser = ParsePhysics(paragraph=paragraph, question=message.text)
 		result = await parser.get_solution_data()
 
 		await send_solution(message, result, state)
@@ -53,13 +56,28 @@ async def parse_question(message: Message, state: FSMContext) -> None:
 
 @router_physics.message(FormPhysics.exercise)
 async def parse_question(message: Message, state: FSMContext) -> None:
-	if re.match(config.FLOAT_NUMBER_PATTERN, message.text):
+	if message.text.isnumeric():
 		await state.update_data(exercise=message.text)
+		data = await state.get_data()
+		paragraph = data.get('paragraph')
 
-		parser = ParsePhysics(exercise=message.text)
+		parser = ParsePhysics(paragraph=paragraph, exercise=message.text)
 		result = await parser.get_solution_data()
 
 		await send_solution(message, result, state)
+	else:
+		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
+		await state.clear()
+
+
+@router_physics.message(FormPhysics.paragraph)
+async def parse_question(message: Message, state: FSMContext) -> None:
+	if message.text.isnumeric():
+		await state.update_data(paragraph=message.text)
+		data = await state.get_data()
+		book = data.get('book')
+
+		await message.answer('Теперь выбери раздел', reply_markup=kb_physics.section_selection_kb(book))
 	else:
 		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
 		await state.clear()
