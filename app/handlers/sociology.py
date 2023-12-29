@@ -4,7 +4,8 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
 from ..keyboards.keyboards import book_selection_kb
-from ..utils import ParseSociology, send_solution
+from ..parsers import ParseSociology
+from ..utils import send_solution
 
 router_sociology = Router()
 

@@ -7,7 +7,8 @@ from aiogram.types import CallbackQuery, Message
 
 from app import config
 from app.keyboards.keyboards import PhysicsKeyboards, book_selection_kb
-from app.utils import send_solution, ParsePhysics
+from app.parsers import ParsePhysics
+from app.utils import send_solution
 
 router_physics = Router()
 

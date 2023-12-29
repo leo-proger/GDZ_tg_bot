@@ -4,7 +4,9 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
 from ..keyboards.keyboards import GeometryKeyboards, book_selection_kb
-from ..utils import ParseGeometry, send_solution
+from ..parsers import ParseGeometry
+from ..utils import send_solution
+
 
 router_geometry = Router()
 geometry_kb = GeometryKeyboards()

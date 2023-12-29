@@ -4,7 +4,8 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 
 from app.keyboards.keyboards import EnglishKeyboards, book_selection_kb
-from app.utils import ParseEnglish, send_solution
+from app.parsers import ParseEnglish
+from app.utils import send_solution
 
 router_english = Router()
 

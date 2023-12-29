@@ -7,7 +7,8 @@ from aiogram.types import Message
 
 from app import config
 from app.keyboards.keyboards import book_selection_kb
-from app.utils import send_solution, ParseMath
+from app.parsers import ParseMath
+from app.utils import send_solution
 
 router_math = Router()
 

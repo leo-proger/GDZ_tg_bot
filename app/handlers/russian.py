@@ -3,7 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
-from ..utils import ParseRussian, send_solution
+from ..parsers import ParseRussian
+from ..utils import send_solution
 
 router_russian = Router()
 
