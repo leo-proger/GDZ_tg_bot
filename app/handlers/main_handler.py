@@ -7,10 +7,11 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from .english import router_english
 from .geometry import router_geometry
 from .math import router_math, FormMath
+from .physics import router_physics, FormPhysics
 from .russian import router_russian, FormRussian
 from .sociology import router_sociology, FormSociology
 from .. import config
-from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
+from ..keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
 
 router = Router()
 router.include_routers(
@@ -19,10 +20,12 @@ router.include_routers(
 	router_math,
 	router_geometry,
 	router_sociology,
+	router_physics,
 	)
 
 english_kb = EnglishKeyboards()
 geometry_kb = GeometryKeyboards()
+physics_kb = PhysicsKeyboards()
 
 
 class MainForm(StatesGroup):
@@ -64,6 +67,12 @@ async def numbering_selection(message: Message, state: FSMContext) -> None:
 				'Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\nЕсли у вас параграф вида '
 				'_"число-число"_, то просто введите число перед дефисом',
 				reply_markup=ReplyKeyboardRemove())
+		elif subject == 'физика':
+			await state.set_state(FormPhysics.book)
+			await state.update_data(book=message.text)
+			await state.set_state(FormPhysics.paragraph)
+
+			await message.answer('Теперь введи параграф', reply_markup=ReplyKeyboardRemove())
 	else:
 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
 		await state.clear()

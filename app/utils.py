@@ -102,8 +102,11 @@ async def send_solution(message: Message, result: dict | None, state: FSMContext
 				await asyncio.sleep(config.MESSAGE_DELAY)
 		elif isinstance(solution, list):
 			for url in solution:
-				image = URLInputFile(url, filename=title)
-				await bot.send_photo(chat_id=message.chat.id, photo=image)
+				if url.startswith('https://'):
+					image = URLInputFile(url, filename=title)
+					await bot.send_photo(chat_id=message.chat.id, photo=image)
+				else:
+					await message.answer(url)
 
 				# Задержка после отправки, чтобы телеграм не выдавал ошибку
 				await asyncio.sleep(config.MESSAGE_DELAY)
@@ -130,36 +133,15 @@ def split_text(text: str, max_length: int = 4096):
 	return parts
 
 
-def get_subject_text(book: str) -> str:
-	subject = book.split()[0].lower()
-
-	subject_messages = {
-		'английский': 'Теперь введи страницу 📖 _(от 10 до 180 включительно)_',
-		'русский': 'Теперь введи упражнение 📃 _(от 1 до 396 включительно)_',
-		'алгебра-задачник': 'Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_',
-		'геометрия': 'Теперь введи номер задания 📖 _(от 1 до 870 включительно)_',
-		'обществознание': ('Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\nЕсли у вас параграф вида '
-		                   '_"число-число"_, то просто введите число перед дефисом')
-		}
-
-	return subject_messages.get(subject, '')
-
-
-def check_numbering(text: str) -> bool:
-	if text.isnumeric() or re.match(config.ALGEBRA_NUMBER_PATTERN, text):
-		return True
-	return False
-
-
 async def parse_gdz(parse_url) -> None | list[str]:
 	async with aiohttp.ClientSession() as session:
 		async with session.get(parse_url, headers=config.HEADERS) as response:
 			if response.status == 404:
 				return None
 
-			text = await response.text()
+			page = await response.text()
 			# TODO: Попробовать сделать асинхронным
-			soup = BeautifulSoup(text, 'html.parser')
+			soup = BeautifulSoup(page, 'html.parser')
 
 			# Url фоток с решениями
 			solutions_url: list[str] = ['https:' + div.img['src'] for div in
@@ -179,12 +161,31 @@ async def parse_resheba(parse_url) -> None | str:
 			if response.status == 404:
 				return None
 
-			text = await response.text()
-			soup = BeautifulSoup(text, 'html.parser')
+			page = await response.text()
+			soup = BeautifulSoup(page, 'html.parser')
 
 			# Текст решения
 			solution_text: list[str] = [p.getText() for p in soup.find_all('div', class_='taskText')]
 			return ''.join(solution_text).replace('\n\n', '\n')
+
+
+async def parse_reshak(parse_url) -> None | list[str]:
+	async with aiohttp.ClientSession() as session:
+		async with session.get(parse_url, headers=config.HEADERS) as response:
+			if response.status == 404:
+				return None
+
+			page = await response.text()
+			soup = BeautifulSoup(page, 'html.parser')
+			result = []
+
+			for el in soup.find_all('h2', class_='titleh2'):
+				result.append(el.get_text())
+				img_link = el.find_next('div').img.get('src', '')
+				if not img_link:
+					img_link = el.find_next('div').img.get('data-src', '')
+				result.append('https://reshak.ru/' + img_link)
+			return result
 
 
 class ParseEnglish:
@@ -319,3 +320,62 @@ class ParseSociology:
 		if not result:
 			return None
 		return {'solution': result, 'title': self.__title}
+
+
+class ParsePhysics:
+	def __init__(self, paragraph: str = None, question: str = None, exercise: str = None) -> None:
+		self.paragraph = paragraph
+		self.question = question
+		self.exercise = exercise
+
+		self.__parse_url = 'https://reshak.ru/'
+		self.__title = ''
+
+	async def get_solution_data(self):
+		if self.question:
+			self.__parse_url += rf'otvet/reshebniki.php?otvet={self.paragraph}/{self.question}&predmet=myakishev10/'
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("физика")}***\n'
+			                                       f'Параграф: ***{self.paragraph}***\n'
+			                                       f'Вопрос: ***{self.question}***')
+		elif self.exercise:
+			links = await self.__find_list_exercises()
+			if not links:
+				return None
+			self.__parse_url += await self.__get_final_link(links)
+			self.__title = config.TITLE_MESSAGE + (f'Учебник: ***{config.BOOKS.get("физика")}***\n'
+			                                       f'Параграф: ***{self.paragraph}***\n'
+			                                       f'Задание: ***{self.exercise}***')
+		result = await parse_reshak(self.__parse_url)
+		if not result:
+			return None
+		return {'solution': result, 'title': self.__title}
+
+	async def __find_list_exercises(self) -> list[str] | None:
+		parse_url = 'https://reshak.ru/reshebniki/fizika/10/myakishev/index.html'
+
+		async with aiohttp.ClientSession() as session:
+			async with session.get(parse_url, headers=config.HEADERS) as response:
+				if response.status == 404:
+					return None
+
+				text = await response.text()
+				soup = BeautifulSoup(text, 'html.parser')
+
+				element_subtitle = soup.find_all(
+					lambda tag: tag.get('class') == ['subtitle'] and self.paragraph in tag.text)
+
+				if element_subtitle:
+					element_razdel = element_subtitle[0].find_next()
+					links = [a.get('href') for a in element_razdel.find_all('a', href=True)]
+					return links
+				else:
+					return None
+
+	async def __get_final_link(self, links: list[str]) -> str:
+		for link in links:
+			match = re.search(r'otvet=\d+/([a-c]\d)&predmet=myakishev10', link)
+			if match:
+				number = match.group(1)[1:]  # Получение числа, следующего после буквы a, b или c
+				if self.exercise == number:
+					return link
+		return ''
