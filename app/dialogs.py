@@ -7,12 +7,15 @@ from aiogram_dialog.widgets.text import Const
 
 from app import config
 from app.handlers.english import parse_page, parse_spotlight_on_russia_page
+from app.handlers.geometry import (parse_exam_preparation_exercise, parse_math_exercise,
+                                   parse_research_exercise, geometry_parse_number)
+from app.handlers.math import math_parse_number
 from app.handlers.russian import parse_exercise
-from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards
-from app.states import MainForm, FormEnglish, FormRussian, FormMath
-from app.handlers.math import parse_number
+from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
+from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry
 
 kb_english = EnglishKeyboards()
+kb_geometry = GeometryKeyboards()
 
 
 async def other_type_handler(message: Message, message_input: MessageInput,
@@ -75,9 +78,51 @@ dialog_russian = Dialog(
 dialog_math = Dialog(
 	Window(
 		Const('Теперь введи номер задания 📖 _(от 1.1 до 60.19 включительно)_'),
-		MessageInput(parse_number, content_types=[ContentType.TEXT],
+		MessageInput(math_parse_number, content_types=[ContentType.TEXT],
 		             filter=F.text.regexp(config.FLOAT_NUMBER_PATTERN)),
 		MessageInput(other_type_handler),
 		state=FormMath.number
 		)
+	)
+dialog_geometry = Dialog(
+	Window(
+		Const('Теперь выбери раздел учебника'),
+		*kb_geometry.section_selection_kb(),
+		state=FormGeometry.section
+		),
+	Window(
+		Const('Осталось выбрать главу, к которой вы хотите получить ответы на вопросы'),
+		*kb_geometry.chapter_selection_kb(),
+		state=FormGeometry.chapter
+		),
+	Window(
+		Const('Теперь выбери страницу, где задачи для подготовки ЕГЭ'),
+		*kb_geometry.page_for_exam_preparation_exercises_selection_kb(),
+		state=FormGeometry.page_for_exam_preparation_exercises
+		),
+	Window(
+		Const('Осталось только ввести номер задачи'),
+		MessageInput(parse_exam_preparation_exercise, content_types=[ContentType.TEXT],
+		             filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormGeometry.exam_preparation_exercise
+		),
+	Window(
+		Const('Введи номер задачи с математическим содержанием'),
+		MessageInput(parse_math_exercise, content_types=[ContentType.TEXT],
+		             filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormGeometry.math_exercise
+		),
+	Window(
+		Const('Выбери исследовательскую задачи'),
+		*kb_geometry.research_exercise_selection_kb(),
+		state=FormGeometry.research_exercise
+		),
+	Window(
+		Const('Теперь введи номер _(от 1 до 870 включительно)_'),
+		MessageInput(geometry_parse_number, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormGeometry.number
+		),
 	)

@@ -27,12 +27,19 @@ class FormMath(StatesGroup):
 
 # geometry.py
 class FormGeometry(StatesGroup):
+	section = State()
+	# Вопросы к главам
+	chapter = State()
+	# Страница задач для подготовки к ЕГЭ
+	page_for_exam_preparation_exercises = State()
+	# Задача для подготовки к ЕГЭ
+	exam_preparation_exercise = State()
+	# Задача с математическим содержанием
+	math_exercise = State()
+	# Исследовательская задача
+	research_exercise = State()
+	# Обычный номер задания
 	number = State()
-	chapter_question = State()
-	page = State()
-	exercise_to_page = State()
-	math_number = State()
-	research_number = State()
 
 
 # physics.py

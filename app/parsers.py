@@ -110,36 +110,41 @@ class ParseMath(BaseParser):
 
 
 class ParseGeometry(BaseParser):
-	def __init__(self, number: str = None, chapter: str = None, page: str = None, exercise_to_page: str = None,
-	             math_number: str = None, research_number: str = None) -> None:
+	def __init__(self,
+	             chapter: str = None,
+	             page_for_exam_preparation_exercises: str = None,
+	             exam_preparation_exercise: str = None,
+	             math_exercise: str = None,
+	             research_exercise: str = None,
+	             number: str = None) -> None:
 		super().__init__('https://gdz.ru/class-10/geometria/atanasyan-10-11/', 'геометрия')
-		self.number = number
 		self.chapter = chapter
-		self.page = page
-		self.exercise_to_page = exercise_to_page
-		self.math_number = math_number
-		self.research_number = research_number
+		self.page_for_exam_preparation_exercises = page_for_exam_preparation_exercises
+		self.exam_preparation_exercise = exam_preparation_exercise
+		self.math_exercise = math_exercise
+		self.research_exercise = research_exercise
+		self.number = number
 
 	async def get_solution_data(self):
 		if self.number:
 			class_type = '10' if self.number and int(self.number) < 400 else '11'
-			self.parse_url = f'{class_type}-class-{self.number}/'
+			self.parse_url += f'{class_type}-class-{self.number}/'
 			self.title += get_annotation_text(номер=self.number)
 		elif self.chapter:
-			self.parse_url = f'vorosi-{self.chapter}/'
+			self.parse_url += f'vorosi-{self.chapter}/'
 			self.title += get_annotation_text(глава=self.chapter)
-		elif self.page and self.exercise_to_page:
-			self.parse_url = f'ege-{self.page}-{self.exercise_to_page}/'
-			self.title += get_annotation_text(страница=self.page, задача=self.exercise_to_page)
-		elif self.math_number:
-			self.parse_url = f'math-{self.math_number}/'
-			self.title += get_annotation_text(задача=self.math_number)
-		elif self.research_number:
-			self.parse_url = f'res-{self.research_number}/'
-			self.title += get_annotation_text(задача=self.research_number)
+		elif self.page_for_exam_preparation_exercises and self.exam_preparation_exercise:
+			self.parse_url += f'ege-{self.page_for_exam_preparation_exercises}-{self.exam_preparation_exercise}/'
+			self.title += get_annotation_text(страница=self.page_for_exam_preparation_exercises,
+			                                  задача=self.exam_preparation_exercise)
+		elif self.math_exercise:
+			self.parse_url += f'math-{self.math_exercise}/'
+			self.title += get_annotation_text(задача=self.math_exercise)
+		elif self.research_exercise:
+			self.parse_url += f'res-{self.research_exercise}/'
+			self.title += get_annotation_text(задача=self.research_exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}

@@ -6,7 +6,7 @@ from app.parsers import ParseMath
 from app.utils import send_solution
 
 
-async def parse_number(message: Message, message_input: MessageInput, dialog_manager: DialogManager) -> None:
+async def math_parse_number(message: Message, message_input: MessageInput, dialog_manager: DialogManager) -> None:
 	dialog_manager.dialog_data['number'] = message.text
 
 	parser = ParseMath(number=message.text)

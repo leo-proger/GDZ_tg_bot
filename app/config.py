@@ -1,6 +1,6 @@
 import os
 
-from .states import FormEnglish, FormRussian, FormMath
+from .states import FormEnglish, FormRussian, FormMath, FormGeometry
 
 HEADERS = {
 	'User-Agent': 'Mozilla/5.0',
@@ -22,7 +22,7 @@ BOOKS = {
 	'английский': ['Английский Spotlight 10 Класс В. Эванс, Д. Дули', 'english1', FormEnglish.section],
 	'русский': ['Русский 10-11 Класс А.И. Власенков, Л.М. Рыбченкова', 'russian1', FormRussian.exercise],
 	'алгебра-задачник': ['Алгебра-Задачник 10-11 Класс А.Г. Мордкович, П. В. Семенов', 'math1', FormMath.number],
-	# 'геометрия': ['Геометрия 10-11 Класс Л.С. Атанасян, В.Ф Бутузов'],
+	'геометрия': ['Геометрия 10-11 Класс Л.С. Атанасян, В.Ф Бутузов', 'geometry1', FormGeometry.section],
 	# 'обществознание': ['Обществознание 10 Класс О.Б. Соболева, В.В. Барабанов'],
 	# 'физика': ['Физика 10 класс Г.Я. Мякишев, Б.Б. Буховцев'],
 	}

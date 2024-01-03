@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram_dialog import DialogManager
 
-from ..dialogs import dialog_english, dialog_russian, dialog_math
+from ..dialogs import *
 from ..dialogs import main_dialog
 from ..keyboards.keyboards import EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
 from ..states import MainForm
@@ -15,8 +15,8 @@ router.include_routers(
 	dialog_english,
 	dialog_russian,
 	dialog_math,
+	dialog_geometry,
 
-	# router_geometry,
 	# router_sociology,
 	# router_physics,
 	)
