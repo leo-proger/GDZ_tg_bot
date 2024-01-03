@@ -15,6 +15,16 @@ class FormEnglish(StatesGroup):
 	module_exercise = State()
 
 
+# russian.py
+class FormRussian(StatesGroup):
+	exercise = State()
+
+
+# math.py
+class FormMath(StatesGroup):
+	number = State()
+
+
 # geometry.py
 class FormGeometry(StatesGroup):
 	number = State()
@@ -25,21 +35,11 @@ class FormGeometry(StatesGroup):
 	research_number = State()
 
 
-# math.py
-class FormMath(StatesGroup):
-	number = State()
-
-
 # physics.py
 class FormPhysics(StatesGroup):
 	book = State()
 	paragraph = State()
 	question = State()
-	exercise = State()
-
-
-# russian.py
-class FormRussian(StatesGroup):
 	exercise = State()
 
 

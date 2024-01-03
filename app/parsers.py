@@ -84,11 +84,10 @@ class ParseRussian(BaseParser):
 
 	async def get_solution_data(self):
 		if self.exercise:
-			self.parse_url = f'{self.exercise}-nom/'
+			self.parse_url += f'{self.exercise}-nom/'
 			self.title += get_annotation_text(упражнение=self.exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
@@ -101,11 +100,10 @@ class ParseMath(BaseParser):
 
 	async def get_solution_data(self):
 		if self.number:
-			self.parse_url = f'{self.number[0]}-item-{self.number[1]}/'
+			self.parse_url += f'{self.number[0]}-item-{self.number[1]}/'
 			self.title += get_annotation_text(номер='.'.join(self.number))
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}

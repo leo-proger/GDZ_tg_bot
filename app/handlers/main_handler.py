@@ -1,35 +1,24 @@
 from aiogram import Router
 from aiogram.filters import Command
-from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram_dialog import (
-	DialogManager, )
+from aiogram.types import Message
+from aiogram_dialog import DialogManager
 
-from .english import router_english
-from .geometry import router_geometry
-from .math import router_math
-from .physics import router_physics
-from .russian import router_russian
-from .sociology import router_sociology
-from .. import config
+from ..dialogs import dialog_english, dialog_russian, dialog_math
 from ..dialogs import main_dialog
 from ..keyboards.keyboards import EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
 from ..states import MainForm
-
-from ..dialogs import dialog_english
 
 router = Router()
 router.include_routers(
 	main_dialog,
 
-	router_english,
 	dialog_english,
+	dialog_russian,
+	dialog_math,
 
-	router_russian,
-	router_math,
-	router_geometry,
-	router_sociology,
-	router_physics,
+	# router_geometry,
+	# router_sociology,
+	# router_physics,
 	)
 
 english_kb = EnglishKeyboards()
@@ -41,26 +30,21 @@ physics_kb = PhysicsKeyboards()
 async def book_selection(message: Message, dialog_manager: DialogManager) -> None:
 	await dialog_manager.start(MainForm.book)
 
-
-# await state.set_state(MainForm.book)
-# await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
-
-
-@router.message(MainForm.book)
-async def subject_selection(message: Message, state: FSMContext) -> None:
-	subject = message.text.split(' ', 1)[0].lower()
-	if subject in config.BOOKS.keys():
-		await state.update_data(book=message.text)
-	# manager.dialog_data['book'] = message.text
-	else:
-		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
-		await state.clear()
-	# await manager.done()
-
-	if subject == 'английский':
-		# await manager.start(FormEnglish.section)
-		await message.answer('Теперь выбери раздел учебника',
-		                     reply_markup=english_kb.section_selection_kb(message.text))
+# @router.message(MainForm.book)
+# async def subject_selection(message: Message, state: FSMContext) -> None:
+# 	subject = message.text.split(' ', 1)[0].lower()
+# 	if subject in config.BOOKS.keys():
+# 		await state.update_data(book=message.text)
+# 	# manager.dialog_data['book'] = message.text
+# 	else:
+# 		await message.reply('Не найдено 😕', reply_markup=ReplyKeyboardRemove())
+# 		await state.clear()
+# 	# await manager.done()
+#
+# 	if subject == 'английский':
+# 		# await manager.start(FormEnglish.section)
+# 		await message.answer('Теперь выбери раздел учебника',
+# 		                     reply_markup=english_kb.section_selection_kb(message.text))
 
 # elif subject == 'русский':
 # 	await state.set_state(FormRussian.exercise)
