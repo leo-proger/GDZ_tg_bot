@@ -1,32 +1,34 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram_dialog.widgets.kbd import Start, Row, Select, Column, Button, SwitchTo
+from aiogram_dialog.widgets.text import Const, Format
 
 from app import config
+from ..states import FormEnglish
 
 
-def book_selection_kb() -> ReplyKeyboardMarkup:
-	builder = ReplyKeyboardBuilder()
-
-	for book in config.BOOKS.values():
-		builder.add(KeyboardButton(text=book))
-
-	builder.adjust(1)  # Сколько кнопок будет по горизонтали
-	return builder.as_markup(resize_keyboard=True)
+def book_selection_kb() -> list[Start]:
+	buttons = [Start(text=Const(book[0]), id=book[1].replace(' ', '_').lower(), state=book[2])
+	           for book in config.BOOKS.values()]
+	return buttons
 
 
 class EnglishKeyboards:
 	@staticmethod
-	def section_selection_kb(book: str) -> InlineKeyboardMarkup:
+	def section_selection_kb(book: str = 'английский spotlight 10 класс в. эванс, д. дули'):
 		sections = config.SECTIONS.get(book.lower())
-		builder = InlineKeyboardBuilder()
-
-		sections_buttons = [InlineKeyboardButton(text=section, callback_data=f'english-{section}') for section in
-		                    sections]
-
-		builder.add(*sections_buttons)
-		builder.adjust(2)
-		return builder.as_markup()
+		# buttons = Column(Select(
+		# 	Format('{item}'),
+		# 	items=sections,
+		# 	item_id_getter=lambda x: x.replace(' ', '_').lower(),
+		# 	id='section_selection',
+		# 	on_click=selected.english_check_section
+		# 	))
+		btn1 = Button(text=Const(sections[0]), id='section1')
+		btn2 = Button(text=Const(sections[1]), id='section2')
+		btn3 = SwitchTo(Const(sections[2]), id='section3', state=FormEnglish.page)
+		buttons = [Row(btn1, btn2), btn3]
+		return buttons
 
 	@staticmethod
 	def module_selection_kb() -> InlineKeyboardMarkup:

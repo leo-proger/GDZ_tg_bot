@@ -8,7 +8,7 @@ class BaseParser:
 	def __init__(self, parse_url_base: str, book) -> None:
 		self.parse_url_base = parse_url_base
 		self.parse_url = None
-		self.title = get_annotation_text(book=BOOKS.get(book))
+		self.title = get_annotation_text(book=BOOKS.get(book)[0])
 
 	async def get_solution_data(self):
 		raise NotImplementedError("Метод должен быть переопределен в дочерних классах")

@@ -1,24 +1,14 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
 from ..keyboards.keyboards import GeometryKeyboards, book_selection_kb
 from ..parsers import ParseGeometry
+from ..states import FormGeometry
 from ..utils import send_solution
-
 
 router_geometry = Router()
 geometry_kb = GeometryKeyboards()
-
-
-class FormGeometry(StatesGroup):
-	number = State()
-	chapter_question = State()
-	page = State()
-	exercise_to_page = State()
-	math_number = State()
-	research_number = State()
 
 
 @router_geometry.message(FormGeometry.exercise_to_page)

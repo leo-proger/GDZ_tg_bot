@@ -2,6 +2,8 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram_dialog import setup_dialogs
 
 from app.config import TOKEN
 from app.handlers import main_handler, default_handlers
@@ -13,7 +15,7 @@ bot = Bot(token=TOKEN, parse_mode='Markdown')
 
 
 async def main():
-	dp = Dispatcher()
+	dp = Dispatcher(storage=MemoryStorage())
 
 	main_handler.router.message.middleware(AddUserToDatabaseMiddleware())
 	default_handlers.router.message.middleware(AddUserToDatabaseMiddleware())
@@ -22,6 +24,7 @@ async def main():
 		main_handler.router,
 		default_handlers.router,
 		)
+	setup_dialogs(dp)
 
 	await bot.delete_webhook(drop_pending_updates=True)
 	await dp.start_polling(bot)

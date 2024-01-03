@@ -1,17 +1,13 @@
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
 from ..keyboards.keyboards import book_selection_kb
 from ..parsers import ParseSociology
+from ..states import FormSociology
 from ..utils import send_solution
 
 router_sociology = Router()
-
-
-class FormSociology(StatesGroup):
-	paragraph = State()
 
 
 @router_sociology.message(FormSociology.paragraph)

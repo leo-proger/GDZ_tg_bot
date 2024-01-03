@@ -1,25 +1,15 @@
-import re
-
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
-from app import config
 from app.keyboards.keyboards import PhysicsKeyboards, book_selection_kb
 from app.parsers import ParsePhysics
+from app.states import FormPhysics
 from app.utils import send_solution
 
 router_physics = Router()
 
 kb_physics = PhysicsKeyboards()
-
-
-class FormPhysics(StatesGroup):
-	book = State()
-	paragraph = State()
-	question = State()
-	exercise = State()
 
 
 @router_physics.callback_query(F.data.startswith('physics_section-'))

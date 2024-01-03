@@ -2,19 +2,15 @@ import re
 
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 
 from app import config
 from app.keyboards.keyboards import book_selection_kb
 from app.parsers import ParseMath
+from app.states import FormMath
 from app.utils import send_solution
 
 router_math = Router()
-
-
-class FormMath(StatesGroup):
-	number = State()
 
 
 @router_math.message(FormMath.number)

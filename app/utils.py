@@ -2,8 +2,8 @@ import asyncio
 import re
 
 import aiohttp
-from aiogram.fsm.context import FSMContext
 from aiogram.types import URLInputFile, Message
+from aiogram_dialog import DialogManager
 from bs4 import BeautifulSoup
 
 from app import config
@@ -11,11 +11,10 @@ from app.keyboards.keyboards import book_selection_kb
 from main import bot
 
 
-async def send_solution(message: Message, result: dict[str: str], state: FSMContext):
+async def send_solution(message: Message, result: dict[str: str], dialog_manager: DialogManager):
 	if not result:
 		# Обработка случая, когда решение не найдено
-		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
-		await state.clear()
+		await message.answer('Не найдено 😕')
 	else:
 		# Извлечение решения и заголовка из результата
 		solution, title = result.get('solution'), result.get('title')
@@ -26,6 +25,7 @@ async def send_solution(message: Message, result: dict[str: str], state: FSMCont
 			# Если решение - список URL-адресов, отправляем их соответственно
 			await send_solution_urls(message, solution, title)
 		await message.answer(title)
+	await dialog_manager.done()
 
 
 async def send_split_text(message: Message, solution: str):
