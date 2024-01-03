@@ -12,6 +12,7 @@ class FormEnglish(StatesGroup):
 	page = State()
 	spotlight_on_russia_page = State()
 	module = State()
+	module_exercise = State()
 
 
 # geometry.py

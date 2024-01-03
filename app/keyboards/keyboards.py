@@ -1,9 +1,11 @@
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup
-from aiogram_dialog.widgets.kbd import Start, Row, Select, Column, Button, SwitchTo
+from aiogram_dialog.widgets.kbd import Start, Row, Select, SwitchTo
 from aiogram_dialog.widgets.text import Const, Format
 
 from app import config
+from ..handlers.english import parse_module_exercise
+from ..selected import save_module
 from ..states import FormEnglish
 
 
@@ -17,46 +19,42 @@ class EnglishKeyboards:
 	@staticmethod
 	def section_selection_kb(book: str = 'английский spotlight 10 класс в. эванс, д. дули'):
 		sections = config.SECTIONS.get(book.lower())
-		# buttons = Column(Select(
-		# 	Format('{item}'),
-		# 	items=sections,
-		# 	item_id_getter=lambda x: x.replace(' ', '_').lower(),
-		# 	id='section_selection',
-		# 	on_click=selected.english_check_section
-		# 	))
-		btn1 = Button(text=Const(sections[0]), id='section1')
-		btn2 = Button(text=Const(sections[1]), id='section2')
+
+		btn1 = SwitchTo(Const(sections[0]), id='section1', state=FormEnglish.spotlight_on_russia_page)
+		btn2 = SwitchTo(Const(sections[1]), id='section2', state=FormEnglish.module)
 		btn3 = SwitchTo(Const(sections[2]), id='section3', state=FormEnglish.page)
+
 		buttons = [Row(btn1, btn2), btn3]
 		return buttons
 
 	@staticmethod
-	def module_selection_kb() -> InlineKeyboardMarkup:
-		builder = InlineKeyboardBuilder()
-
-		for module in range(1, 9):
-			builder.add(
-				InlineKeyboardButton(
-					text=str(module),
-					callback_data='english_module-' + str(module)
-					)
-				)
-		builder.adjust(4)
-		return builder.as_markup()
+	def module_selection_kb() -> list[Row]:
+		row_buttons1 = Row(Select(
+			text=Format('{item}'),
+			id='module_selection_row1',
+			item_id_getter=lambda item: item,
+			items=range(1, 5),
+			on_click=save_module
+			))
+		row_buttons2 = Row(Select(
+			text=Format('{item}'),
+			id='module_selection_row2',
+			item_id_getter=lambda item: item,
+			items=range(5, 9),
+			on_click=save_module
+			))
+		return [row_buttons1, row_buttons2]
 
 	@staticmethod
-	def module_exercise_selection_kb() -> InlineKeyboardMarkup:
-		builder = InlineKeyboardBuilder()
-
-		for exercise in range(1, 5):
-			builder.add(
-				InlineKeyboardButton(
-					text=str(exercise),
-					callback_data='english_module_exercise-' + str(exercise)
-					)
-				)
-		builder.adjust(2)
-		return builder.as_markup()
+	def module_exercise_selection_kb() -> Row:
+		row_buttons = Row(Select(
+			text=Format('{item}'),
+			id='module_exercise_selection_row',
+			item_id_getter=lambda item: item,
+			items=range(1, 5),
+			on_click=parse_module_exercise
+			))
+		return row_buttons
 
 
 class GeometryKeyboards:

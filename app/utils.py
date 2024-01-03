@@ -1,13 +1,10 @@
 import asyncio
 import re
 
-import aiohttp
 from aiogram.types import URLInputFile, Message
 from aiogram_dialog import DialogManager
-from bs4 import BeautifulSoup
 
 from app import config
-from app.keyboards.keyboards import book_selection_kb
 from main import bot
 
 
@@ -62,45 +59,6 @@ def split_text(text: str, max_length: int = 4096) -> list[str]:
 			start = boundaries[i - 1][1]
 	parts.append(text[start:])
 	return parts
-
-
-class PageParser:
-	def __init__(self, parse_url: str) -> None:
-		self.parse_url = parse_url
-
-	@staticmethod
-	async def parse_page(parse_url: str) -> BeautifulSoup | None:
-		async with aiohttp.ClientSession() as session:
-			async with session.get(parse_url, headers=config.HEADERS) as response:
-				if response.status == 404:
-					return None
-				page = await response.text()
-				return BeautifulSoup(page, 'html.parser')
-
-	async def parse_gdz(self) -> list[str] | None:
-		soup = await self.parse_page(self.parse_url)
-		if not soup:
-			return None
-		solutions_url = ['https:' + div.img['src'] for div in soup.find_all('div', class_='with-overtask')]
-		return solutions_url or ['https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
-
-	async def parse_resheba(self) -> str | None:
-		soup = await self.parse_page(self.parse_url)
-		if not soup:
-			return None
-		solution_text = [p.getText() for p in soup.find_all('div', class_='taskText')]
-		return ''.join(solution_text).replace('\n\n', '\n')
-
-	async def parse_reshak(self) -> list[str] | None:
-		soup = await self.parse_page(self.parse_url)
-		if not soup:
-			return None
-		result = []
-		for el in soup.find_all('h2', class_='titleh2'):
-			result.append(el.get_text())
-			img_link = el.find_next('div').img.get('src', '') or el.find_next('div').img.get('data-src', '')
-			result.append('https://reshak.ru/' + img_link)
-		return result
 
 
 def get_annotation_text(book: str = None, **kwargs) -> str:

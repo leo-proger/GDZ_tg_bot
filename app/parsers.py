@@ -1,17 +1,53 @@
 import re
 
+import aiohttp
+from bs4 import BeautifulSoup
+
+from . import config
 from .config import BOOKS
-from .utils import get_annotation_text, PageParser
+from .utils import get_annotation_text
 
 
 class BaseParser:
 	def __init__(self, parse_url_base: str, book) -> None:
-		self.parse_url_base = parse_url_base
-		self.parse_url = None
+		self.parse_url = parse_url_base
 		self.title = get_annotation_text(book=BOOKS.get(book)[0])
 
 	async def get_solution_data(self):
 		raise NotImplementedError("Метод должен быть переопределен в дочерних классах")
+
+	async def get_response(self) -> BeautifulSoup | None:
+		async with aiohttp.ClientSession() as session:
+			async with session.get(self.parse_url, headers=config.HEADERS) as response:
+				if response.status == 404:
+					return None
+				page = await response.text()
+				return BeautifulSoup(page, 'html.parser')
+
+	async def parse_gdz(self) -> list[str] | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		solutions_url = ['https:' + div.img['src'] for div in soup.find_all('div', class_='with-overtask')]
+		return solutions_url or ['https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
+
+	async def parse_resheba(self) -> str | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		solution_text = [p.getText() for p in soup.find_all('div', class_='taskText')]
+		return ''.join(solution_text).replace('\n\n', '\n')
+
+	async def parse_reshak(self) -> list[str] | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		result = []
+		for el in soup.find_all('h2', class_='titleh2'):
+			result.append(el.get_text())
+			img_link = el.find_next('div').img.get('src', '') or el.find_next('div').img.get('data-src', '')
+			result.append('https://reshak.ru/' + img_link)
+		return result
 
 
 class ParseEnglish(BaseParser):
@@ -26,17 +62,16 @@ class ParseEnglish(BaseParser):
 
 	async def get_solution_data(self):
 		if self.page:
-			self.parse_url = f'{self.page}-s/'
-			self.title += get_annotation_text(раздел='страницы учебника', страница=self.page)
+			self.parse_url += f'{self.page}-s/'
+			self.title += get_annotation_text(раздел='Страницы учебника', страница=self.page)
 		elif self.module and self.module_exercise:
-			self.parse_url = f'{int(self.module) + 1}-s-{self.module_exercise}/'
+			self.parse_url += f'{int(self.module) + 1}-s-{self.module_exercise}/'
 			self.title += get_annotation_text(раздел='Song Sheets', модуль=self.module, упражнение=self.module_exercise)
 		elif self.spotlight_on_russia_page:
-			self.parse_url = f'1-s-{self.spotlight_on_russia_page}/'
+			self.parse_url += f'1-s-{self.spotlight_on_russia_page}/'
 			self.title += get_annotation_text(раздел='Spotlight on Russia', страница=self.spotlight_on_russia_page)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
