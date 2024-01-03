@@ -16,9 +16,9 @@ class BaseParser:
 	async def get_solution_data(self):
 		raise NotImplementedError("Метод должен быть переопределен в дочерних классах")
 
-	async def get_response(self) -> BeautifulSoup | None:
+	async def get_response(self, url: str = None) -> BeautifulSoup | None:
 		async with aiohttp.ClientSession() as session:
-			async with session.get(self.parse_url, headers=config.HEADERS) as response:
+			async with session.get(url or self.parse_url, headers=config.HEADERS) as response:
 				if response.status == 404:
 					return None
 				page = await response.text()
@@ -176,22 +176,21 @@ class ParsePhysics(BaseParser):
 	async def get_solution_data(self):
 		if self.question:
 			# Часть строки "otvet/reshebniki.php?" в parse_url_base не переносить, так как заденет другие части кода
-			self.parse_url = f'otvet/reshebniki.php?otvet={self.paragraph}/{self.question}&predmet=myakishev10/'
+			self.parse_url += f'otvet/reshebniki.php?otvet={self.paragraph}/{self.question}&predmet=myakishev10/'
 			self.title += get_annotation_text(параграф=self.paragraph, вопрос=self.question)
 		elif self.exercise:
 			links = await self.find_list_exercises()
-			self.parse_url = await self.get_final_link(links)
+			self.parse_url += await self.get_final_link(links)
 			self.title += get_annotation_text(параграф=self.paragraph, задание=self.exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_reshak()
+		result = await super().parse_reshak()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
 
 	async def find_list_exercises(self) -> list[str] or None:
 		parse_url = 'https://reshak.ru/reshebniki/fizika/10/myakishev/index.html'
-		soup = await PageParser.parse_page(parse_url)
+		soup = await super().get_response(url=parse_url)
 		if not soup:
 			return None
 

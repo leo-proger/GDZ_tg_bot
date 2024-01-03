@@ -49,6 +49,7 @@ class FormSociology(StatesGroup):
 
 # physics.py
 class FormPhysics(StatesGroup):
+	section = State()
 	book = State()
 	paragraph = State()
 	question = State()

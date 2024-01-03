@@ -6,7 +6,7 @@ from ..parsers import ParseRussian
 from ..utils import send_solution
 
 
-async def parse_exercise(message: Message, message_input: MessageInput, dialog_manager: DialogManager):
+async def russian_parse_exercise(message: Message, message_input: MessageInput, dialog_manager: DialogManager):
 	dialog_manager.dialog_data['exercise'] = message.text
 
 	parser = ParseRussian(exercise=message.text)

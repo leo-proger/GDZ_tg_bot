@@ -10,13 +10,16 @@ from app.handlers.english import parse_page, parse_spotlight_on_russia_page
 from app.handlers.geometry import (parse_exam_preparation_exercise, parse_math_exercise,
                                    geometry_parse_number)
 from app.handlers.math import math_parse_number
-from app.handlers.russian import parse_exercise
+from app.handlers.physics import parse_question, physics_parse_exercise
+from app.handlers.russian import russian_parse_exercise
 from app.handlers.sociology import parse_paragraph
-from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
-from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry, FormSociology
+from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
+from app.selected import save_paragraph
+from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry, FormSociology, FormPhysics
 
 kb_english = EnglishKeyboards()
 kb_geometry = GeometryKeyboards()
+kb_physics = PhysicsKeyboards()
 
 
 async def other_type_handler(message: Message, message_input: MessageInput,
@@ -71,7 +74,7 @@ dialog_english = Dialog(
 dialog_russian = Dialog(
 	Window(
 		Const('Теперь введи упражнение 📃 _(от 1 до 396 включительно)_'),
-		MessageInput(parse_exercise, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(russian_parse_exercise, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
 		MessageInput(other_type_handler),
 		state=FormRussian.exercise
 		)
@@ -134,5 +137,30 @@ dialog_sociology = Dialog(
 		MessageInput(parse_paragraph, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
 		MessageInput(other_type_handler),
 		state=FormSociology.paragraph
+		)
+	)
+dialog_physics = Dialog(
+	Window(
+		Const('Теперь введи параграф'),
+		MessageInput(save_paragraph, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormPhysics.paragraph
+		),
+	Window(
+		Const('Теперь выбери раздел'),
+		*kb_physics.section_selection_kb(),
+		state=FormPhysics.section
+		),
+	Window(
+		Const('Теперь введи номер задания'),
+		MessageInput(physics_parse_exercise, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormPhysics.exercise
+		),
+	Window(
+		Const('Теперь введи номер вопроса'),
+		MessageInput(parse_question, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormPhysics.question
 		)
 	)
