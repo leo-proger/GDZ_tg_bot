@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app import config
@@ -20,5 +21,6 @@ async def get_help(message: Message) -> None:
 
 
 @router.message(F.text)
-async def other_text(message: Message):
+async def other_text(message: Message, state: FSMContext) -> None:
+	await state.clear()
 	await message.answer('Чтобы отобразить список учебников, введите /list')

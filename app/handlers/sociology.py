@@ -1,28 +1,15 @@
-from aiogram import Router
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
+from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.input import MessageInput
 
-from ..keyboards.keyboards import book_selection_kb
 from ..parsers import ParseSociology
 from ..utils import send_solution
 
-router_sociology = Router()
 
+async def parse_paragraph(message: Message, message_input: MessageInput, dialog_manager: DialogManager):
+	dialog_manager.dialog_data['paragraph'] = message.text
 
-class FormSociology(StatesGroup):
-	paragraph = State()
+	parser = ParseSociology(paragraph=message.text)
+	result = await parser.get_solution_data()
 
-
-@router_sociology.message(FormSociology.paragraph)
-async def parse_paragraph(message: Message, state: FSMContext):
-	if message.text.isnumeric():
-		await state.update_data(parapgraph=message.text)
-
-		parser = ParseSociology(paragraph=message.text)
-		result = await parser.get_solution_data()
-
-		await send_solution(message, result, state)
-	else:
-		await message.answer('Не найдено 😕', reply_markup=book_selection_kb())
-		await state.clear()
+	await send_solution(message, result, dialog_manager)

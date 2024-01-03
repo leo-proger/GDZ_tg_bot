@@ -1,17 +1,53 @@
 import re
 
+import aiohttp
+from bs4 import BeautifulSoup
+
+from . import config
 from .config import BOOKS
-from .utils import get_annotation_text, PageParser
+from .utils import get_annotation_text
 
 
 class BaseParser:
 	def __init__(self, parse_url_base: str, book) -> None:
-		self.parse_url_base = parse_url_base
-		self.parse_url = None
-		self.title = get_annotation_text(book=BOOKS.get(book))
+		self.parse_url = parse_url_base
+		self.title = get_annotation_text(book=BOOKS.get(book)[0])
 
 	async def get_solution_data(self):
 		raise NotImplementedError("Метод должен быть переопределен в дочерних классах")
+
+	async def get_response(self, url: str = None) -> BeautifulSoup | None:
+		async with aiohttp.ClientSession() as session:
+			async with session.get(url or self.parse_url, headers=config.HEADERS) as response:
+				if response.status == 404:
+					return None
+				page = await response.text()
+				return BeautifulSoup(page, 'html.parser')
+
+	async def parse_gdz(self) -> list[str] | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		solutions_url = ['https:' + div.img['src'] for div in soup.find_all('div', class_='with-overtask')]
+		return solutions_url or ['https://gdz.ru' + soup.find('div', class_='task-img-container').img['src']]
+
+	async def parse_resheba(self) -> str | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		solution_text = [p.getText() for p in soup.find_all('div', class_='taskText')]
+		return ''.join(solution_text).replace('\n\n', '\n')
+
+	async def parse_reshak(self) -> list[str] | None:
+		soup = await self.get_response()
+		if not soup:
+			return None
+		result = []
+		for el in soup.find_all('h2', class_='titleh2'):
+			result.append(el.get_text())
+			img_link = el.find_next('div').img.get('src', '') or el.find_next('div').img.get('data-src', '')
+			result.append('https://reshak.ru/' + img_link)
+		return result
 
 
 class ParseEnglish(BaseParser):
@@ -26,17 +62,16 @@ class ParseEnglish(BaseParser):
 
 	async def get_solution_data(self):
 		if self.page:
-			self.parse_url = f'{self.page}-s/'
-			self.title += get_annotation_text(раздел='страницы учебника', страница=self.page)
+			self.parse_url += f'{self.page}-s/'
+			self.title += get_annotation_text(раздел='Страницы учебника', страница=self.page)
 		elif self.module and self.module_exercise:
-			self.parse_url = f'{int(self.module) + 1}-s-{self.module_exercise}/'
+			self.parse_url += f'{int(self.module) + 1}-s-{self.module_exercise}/'
 			self.title += get_annotation_text(раздел='Song Sheets', модуль=self.module, упражнение=self.module_exercise)
 		elif self.spotlight_on_russia_page:
-			self.parse_url = f'1-s-{self.spotlight_on_russia_page}/'
+			self.parse_url += f'1-s-{self.spotlight_on_russia_page}/'
 			self.title += get_annotation_text(раздел='Spotlight on Russia', страница=self.spotlight_on_russia_page)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
@@ -49,11 +84,10 @@ class ParseRussian(BaseParser):
 
 	async def get_solution_data(self):
 		if self.exercise:
-			self.parse_url = f'{self.exercise}-nom/'
+			self.parse_url += f'{self.exercise}-nom/'
 			self.title += get_annotation_text(упражнение=self.exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
@@ -66,47 +100,51 @@ class ParseMath(BaseParser):
 
 	async def get_solution_data(self):
 		if self.number:
-			self.parse_url = f'{self.number[0]}-item-{self.number[1]}/'
+			self.parse_url += f'{self.number[0]}-item-{self.number[1]}/'
 			self.title += get_annotation_text(номер='.'.join(self.number))
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
 
 
 class ParseGeometry(BaseParser):
-	def __init__(self, number: str = None, chapter: str = None, page: str = None, exercise_to_page: str = None,
-	             math_number: str = None, research_number: str = None) -> None:
+	def __init__(self,
+	             chapter: str = None,
+	             page_for_exam_preparation_exercises: str = None,
+	             exam_preparation_exercise: str = None,
+	             math_exercise: str = None,
+	             research_exercise: str = None,
+	             number: str = None) -> None:
 		super().__init__('https://gdz.ru/class-10/geometria/atanasyan-10-11/', 'геометрия')
-		self.number = number
 		self.chapter = chapter
-		self.page = page
-		self.exercise_to_page = exercise_to_page
-		self.math_number = math_number
-		self.research_number = research_number
+		self.page_for_exam_preparation_exercises = page_for_exam_preparation_exercises
+		self.exam_preparation_exercise = exam_preparation_exercise
+		self.math_exercise = math_exercise
+		self.research_exercise = research_exercise
+		self.number = number
 
 	async def get_solution_data(self):
 		if self.number:
 			class_type = '10' if self.number and int(self.number) < 400 else '11'
-			self.parse_url = f'{class_type}-class-{self.number}/'
+			self.parse_url += f'{class_type}-class-{self.number}/'
 			self.title += get_annotation_text(номер=self.number)
 		elif self.chapter:
-			self.parse_url = f'vorosi-{self.chapter}/'
+			self.parse_url += f'vorosi-{self.chapter}/'
 			self.title += get_annotation_text(глава=self.chapter)
-		elif self.page and self.exercise_to_page:
-			self.parse_url = f'ege-{self.page}-{self.exercise_to_page}/'
-			self.title += get_annotation_text(страница=self.page, задача=self.exercise_to_page)
-		elif self.math_number:
-			self.parse_url = f'math-{self.math_number}/'
-			self.title += get_annotation_text(задача=self.math_number)
-		elif self.research_number:
-			self.parse_url = f'res-{self.research_number}/'
-			self.title += get_annotation_text(задача=self.research_number)
+		elif self.page_for_exam_preparation_exercises and self.exam_preparation_exercise:
+			self.parse_url += f'ege-{self.page_for_exam_preparation_exercises}-{self.exam_preparation_exercise}/'
+			self.title += get_annotation_text(страница=self.page_for_exam_preparation_exercises,
+			                                  задача=self.exam_preparation_exercise)
+		elif self.math_exercise:
+			self.parse_url += f'math-{self.math_exercise}/'
+			self.title += get_annotation_text(задача=self.math_exercise)
+		elif self.research_exercise:
+			self.parse_url += f'res-{self.research_exercise}/'
+			self.title += get_annotation_text(задача=self.research_exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_gdz()
+		result = await super().parse_gdz()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
@@ -119,11 +157,10 @@ class ParseSociology(BaseParser):
 
 	async def get_solution_data(self):
 		if self.paragraph:
-			self.parse_url = f'paragraph-{self.paragraph}'
+			self.parse_url += f'paragraph-{self.paragraph}'
 			self.title += get_annotation_text(параграф=self.paragraph)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_resheba()
+		result = await super().parse_resheba()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
@@ -139,22 +176,21 @@ class ParsePhysics(BaseParser):
 	async def get_solution_data(self):
 		if self.question:
 			# Часть строки "otvet/reshebniki.php?" в parse_url_base не переносить, так как заденет другие части кода
-			self.parse_url = f'otvet/reshebniki.php?otvet={self.paragraph}/{self.question}&predmet=myakishev10/'
+			self.parse_url += f'otvet/reshebniki.php?otvet={self.paragraph}/{self.question}&predmet=myakishev10/'
 			self.title += get_annotation_text(параграф=self.paragraph, вопрос=self.question)
 		elif self.exercise:
 			links = await self.find_list_exercises()
-			self.parse_url = await self.get_final_link(links)
+			self.parse_url += await self.get_final_link(links)
 			self.title += get_annotation_text(параграф=self.paragraph, задание=self.exercise)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_reshak()
+		result = await super().parse_reshak()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}
 
 	async def find_list_exercises(self) -> list[str] or None:
 		parse_url = 'https://reshak.ru/reshebniki/fizika/10/myakishev/index.html'
-		soup = await PageParser.parse_page(parse_url)
+		soup = await super().get_response(url=parse_url)
 		if not soup:
 			return None
 
