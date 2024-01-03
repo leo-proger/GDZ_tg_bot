@@ -16,8 +16,7 @@ router.include_routers(
 	dialog_russian,
 	dialog_math,
 	dialog_geometry,
-
-	# router_sociology,
+	dialog_sociology,
 	# router_physics,
 	)
 

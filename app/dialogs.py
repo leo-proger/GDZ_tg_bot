@@ -8,11 +8,12 @@ from aiogram_dialog.widgets.text import Const
 from app import config
 from app.handlers.english import parse_page, parse_spotlight_on_russia_page
 from app.handlers.geometry import (parse_exam_preparation_exercise, parse_math_exercise,
-                                   parse_research_exercise, geometry_parse_number)
+                                   geometry_parse_number)
 from app.handlers.math import math_parse_number
 from app.handlers.russian import parse_exercise
+from app.handlers.sociology import parse_paragraph
 from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards
-from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry
+from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry, FormSociology
 
 kb_english = EnglishKeyboards()
 kb_geometry = GeometryKeyboards()
@@ -125,4 +126,13 @@ dialog_geometry = Dialog(
 		MessageInput(other_type_handler),
 		state=FormGeometry.number
 		),
+	)
+dialog_sociology = Dialog(
+	Window(
+		Const('Теперь введи параграф учебника 📖 _(от 1 до 44 включительно)_\n\n'
+		      'Если у вас параграф вида _"число-число"_, то просто введите число перед дефисом'),
+		MessageInput(parse_paragraph, content_types=[ContentType.TEXT], filter=F.text.isdigit()),
+		MessageInput(other_type_handler),
+		state=FormSociology.paragraph
+		)
 	)

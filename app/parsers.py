@@ -157,11 +157,10 @@ class ParseSociology(BaseParser):
 
 	async def get_solution_data(self):
 		if self.paragraph:
-			self.parse_url = f'paragraph-{self.paragraph}'
+			self.parse_url += f'paragraph-{self.paragraph}'
 			self.title += get_annotation_text(параграф=self.paragraph)
 
-		parser = PageParser(f'{self.parse_url_base}{self.parse_url}')
-		result = await parser.parse_resheba()
+		result = await super().parse_resheba()
 		if not result:
 			return None
 		return {'solution': result, 'title': self.title}

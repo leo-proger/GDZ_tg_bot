@@ -42,14 +42,14 @@ class FormGeometry(StatesGroup):
 	number = State()
 
 
+# sociology.py
+class FormSociology(StatesGroup):
+	paragraph = State()
+
+
 # physics.py
 class FormPhysics(StatesGroup):
 	book = State()
 	paragraph = State()
 	question = State()
 	exercise = State()
-
-
-# sociology.py
-class FormSociology(StatesGroup):
-	paragraph = State()
