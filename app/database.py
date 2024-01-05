@@ -30,3 +30,20 @@ class User:
 					await conn.commit()
 					return {'status_code': 200}
 				return {'status_code': 409}
+
+	@staticmethod
+	async def get_users() -> list[list]:
+		pool = await aiomysql.create_pool(
+			host=MYSQL_HOST,
+			user=MYSQL_USER,
+			password=MYSQL_PASSWORD,
+			db=MYSQL_DATABASE
+			)
+		async with pool.acquire() as conn:
+			async with conn.cursor() as cur:
+				await cur.execute("SELECT telegram_id, first_name, last_name FROM Users")
+
+				users = []
+				async for row in cur:
+					users.append([row[0], row[1], row[2]])
+		return users
