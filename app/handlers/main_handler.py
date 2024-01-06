@@ -35,7 +35,9 @@ async def get_help(message: Message) -> None:
 	await message.answer(config.GET_HELP_MESSAGE)
 
 
-@router.message()
-async def other(message: Message, state: FSMContext) -> None:
-	await state.clear()
-	await message.answer('Чтобы отобразить список учебников, введите /list')
+# TODO: Перед релизом что-то сделать с этим: вместо того, чтобы обработать сообщение MessageInput,
+#  этот хэндлер перехватывает его
+# @router.message()
+# async def other(message: Message, state: FSMContext) -> None:
+# 	await state.clear()
+# 	await message.answer('Чтобы отобразить список учебников, введите /list')

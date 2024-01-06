@@ -27,6 +27,7 @@ async def send_whats_new():
 	for user in users:
 		try:
 			await bot.send_message(user, message)
+		# await asyncio.sleep(100)
 		except TelegramForbiddenError:
 			print('Бот заблокирован пользователем')
 
@@ -46,7 +47,7 @@ async def main():
 	setup_dialogs(dp)
 	await bot.delete_webhook(drop_pending_updates=True)
 
-	await send_whats_new()
+	await asyncio.create_task(send_whats_new())
 
 	await dp.start_polling(bot)
 
