@@ -5,7 +5,6 @@ from aiogram.fsm.context import FSMContext
 from ..dialogs import *
 from ..dialogs import main_dialog
 from ..states import MainForm
-from ..utils import send_whats_new
 
 router = Router()
 router.include_routers(
@@ -38,7 +37,5 @@ async def get_help(message: Message) -> None:
 
 @router.message()
 async def other(message: Message, state: FSMContext) -> None:
-	# await state.clear()
-	# await message.answer('Чтобы отобразить список учебников, введите /list')
-	msg = await send_whats_new()
-	await message.answer(msg)
+	await state.clear()
+	await message.answer('Чтобы отобразить список учебников, введите /list')

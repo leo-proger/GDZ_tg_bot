@@ -6,7 +6,6 @@ from aiogram_dialog import DialogManager
 
 from app import config
 from main import bot
-from .database import User
 
 
 async def send_solution(message: Message, result: dict[str: str], dialog_manager: DialogManager):
@@ -67,6 +66,3 @@ def get_annotation_text(book: str = None, **kwargs) -> str:
 	additional_info = '\n'.join(
 		[f'{key.capitalize()}: ***{value}***' for key, value in kwargs.items()]) if kwargs else ''
 	return base_text + additional_info
-
-async def send_whats_new():
-	users = User.get_users()
