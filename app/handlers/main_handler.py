@@ -35,8 +35,6 @@ async def get_help(message: Message) -> None:
 	await message.answer(config.GET_HELP_MESSAGE)
 
 
-
-
 @router.message()
 async def other(message: Message, state: FSMContext) -> None:
 	await state.clear()
