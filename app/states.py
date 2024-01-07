@@ -6,6 +6,11 @@ class MainForm(StatesGroup):
 	book = State()  # Отдельный учебник какого-то автора
 
 
+# Для админки
+class AdminForm(StatesGroup):
+	admin = State()
+
+
 # english.py
 class FormEnglish(StatesGroup):
 	section = State()

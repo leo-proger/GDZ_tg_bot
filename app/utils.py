@@ -1,10 +1,13 @@
 import asyncio
 import re
 
-from aiogram.types import URLInputFile, Message
+from aiogram.exceptions import TelegramForbiddenError
+from aiogram.types import URLInputFile, Message, CallbackQuery
 from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.kbd import Button
 
 from app import config
+from app.database import Users
 from main import bot
 
 
@@ -66,3 +69,24 @@ def get_annotation_text(book: str = None, **kwargs) -> str:
 	additional_info = '\n'.join(
 		[f'{key.capitalize()}: ***{value}***' for key, value in kwargs.items()]) if kwargs else ''
 	return base_text + additional_info
+
+
+async def send_whats_new(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+	users = await Users.get_users()
+
+	message = '''
+	Привет! Я обновился до версии ***2.0.0***
+
+	***Что нового:***
+	• Добавлены разделы для учебников
+	• Добавлен новый учебник - физика
+	• Теперь каждое обновление я буду оповещать вас о нем (если вам это не нравится, то прошу написать владельцу)
+	• Исправлены ошибки
+	'''
+	for user in users:
+		try:
+			await bot.send_message(user, message)
+		# await asyncio.sleep(100)
+		except TelegramForbiddenError:
+			print(f'Бот заблокирован пользователем {user}')
+	await dialog_manager.done()

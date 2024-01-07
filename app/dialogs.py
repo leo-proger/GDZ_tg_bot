@@ -13,9 +13,10 @@ from app.handlers.math import math_parse_number
 from app.handlers.physics import parse_question, physics_parse_exercise
 from app.handlers.russian import russian_parse_exercise
 from app.handlers.sociology import parse_paragraph
-from app.keyboards.keyboards import book_selection_kb, EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards
+from app.keyboards.keyboards import (book_selection_kb, EnglishKeyboards, GeometryKeyboards, PhysicsKeyboards,
+                                     admin_actions_kb)
 from app.selected import save_paragraph
-from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry, FormSociology, FormPhysics
+from app.states import MainForm, FormEnglish, FormRussian, FormMath, FormGeometry, FormSociology, FormPhysics, AdminForm
 
 kb_english = EnglishKeyboards()
 kb_geometry = GeometryKeyboards()
@@ -32,11 +33,20 @@ main_dialog = Dialog(
 	Window(
 		Const('Выбери учебник 📐📓📊📘'),
 		*book_selection_kb(),
+		MessageInput(other_type_handler),
 		markup_factory=ReplyKeyboardFactory(
 			input_field_placeholder=Const("Выбери учебник из списка ниже"),
 			resize_keyboard=True,
 			),
 		state=MainForm.book
+		)
+	)
+
+dialog_admin = Dialog(
+	Window(
+		Const('Вы в админке'),
+		*admin_actions_kb(),
+		state=AdminForm.admin
 		)
 	)
 

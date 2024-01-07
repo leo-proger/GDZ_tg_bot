@@ -1,4 +1,4 @@
-from aiogram_dialog.widgets.kbd import Start, Row, Select, SwitchTo
+from aiogram_dialog.widgets.kbd import Start, Row, Select, SwitchTo, Button
 from aiogram_dialog.widgets.text import Const, Format
 
 from app import config
@@ -6,12 +6,19 @@ from ..handlers.english import parse_module_exercise
 from ..handlers.geometry import parse_chapter, parse_research_exercise
 from ..selected import save_module, save_page_for_exam_preparation_exercises
 from ..states import FormEnglish, FormGeometry, FormPhysics
+from ..utils import send_whats_new
 
 
 def book_selection_kb() -> list[Start]:
 	buttons = [Start(text=Const(book[0]), id=book[1].replace(' ', '_').lower(), state=book[2])
 	           for book in config.BOOKS.values()]
 	return buttons
+
+
+def admin_actions_kb():
+	btn1 = Button(text=Const('Разослать сообщение об обновлении'), id='mailing', on_click=send_whats_new)
+	actions = [btn1]
+	return actions
 
 
 class EnglishKeyboards:

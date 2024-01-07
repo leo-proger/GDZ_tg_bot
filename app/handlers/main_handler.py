@@ -9,6 +9,8 @@ from ..states import MainForm
 router = Router()
 router.include_routers(
 	main_dialog,
+	dialog_admin,
+
 	dialog_english,
 	dialog_russian,
 	dialog_math,
@@ -33,6 +35,14 @@ async def book_selection(message: Message, dialog_manager: DialogManager) -> Non
 @router.message(Command('help'))
 async def get_help(message: Message) -> None:
 	await message.answer(config.GET_HELP_MESSAGE)
+
+
+@router.message(Command('admin'))
+async def admin(message: Message, dialog_manager: DialogManager) -> None:
+	if str(message.from_user.id) == '1491267583':
+		await dialog_manager.start(AdminForm.admin)
+	else:
+		await message.answer('Чтобы отобразить список учебников, введите /list')
 
 
 # TODO: Перед релизом что-то сделать с этим: вместо того, чтобы обработать сообщение MessageInput,
