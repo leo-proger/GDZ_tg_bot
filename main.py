@@ -6,6 +6,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram_dialog import setup_dialogs
 
 from app.config import TOKEN
+from app.dialogs import *
 from app.handlers import main_handler
 from app.middlewares.add_user_to_db_middleware import AddUserToDatabaseMiddleware
 
@@ -19,6 +20,16 @@ async def main():
 	main_handler.router.message.middleware(AddUserToDatabaseMiddleware())
 
 	dp.include_routers(
+		main_dialog,
+		dialog_admin,
+
+		dialog_english,
+		dialog_russian,
+		dialog_math,
+		dialog_geometry,
+		dialog_sociology,
+		dialog_physics,
+
 		main_handler.router,
 		)
 	setup_dialogs(dp)

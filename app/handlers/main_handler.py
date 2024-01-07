@@ -3,21 +3,22 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from ..dialogs import *
-from ..dialogs import main_dialog
 from ..states import MainForm
 
 router = Router()
-router.include_routers(
-	main_dialog,
-	dialog_admin,
 
-	dialog_english,
-	dialog_russian,
-	dialog_math,
-	dialog_geometry,
-	dialog_sociology,
-	dialog_physics
-	)
+
+# router.include_routers(
+# 	main_dialog,
+# 	dialog_admin,
+#
+# 	dialog_english,
+# 	dialog_russian,
+# 	dialog_math,
+# 	dialog_geometry,
+# 	dialog_sociology,
+# 	dialog_physics
+# 	)
 
 
 @router.message(Command('start'))
@@ -45,9 +46,7 @@ async def admin(message: Message, dialog_manager: DialogManager) -> None:
 		await message.answer('Чтобы отобразить список учебников, введите /list')
 
 
-# TODO: Перед релизом что-то сделать с этим: вместо того, чтобы обработать сообщение MessageInput,
-#  этот хэндлер перехватывает его
-# @router.message()
-# async def other(message: Message, state: FSMContext) -> None:
-# 	await state.clear()
-# 	await message.answer('Чтобы отобразить список учебников, введите /list')
+@router.message()
+async def other(message: Message, state: FSMContext) -> None:
+	await state.clear()
+	await message.answer('Чтобы отобразить список учебников, введите /list')
