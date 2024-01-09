@@ -3,22 +3,9 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
 from ..dialogs import *
-from ..states import MainForm
+from ..states import MainForm, AdminForm
 
 router = Router()
-
-
-# router.include_routers(
-# 	main_dialog,
-# 	dialog_admin,
-#
-# 	dialog_english,
-# 	dialog_russian,
-# 	dialog_math,
-# 	dialog_geometry,
-# 	dialog_sociology,
-# 	dialog_physics
-# 	)
 
 
 @router.message(Command('start'))

@@ -82,6 +82,7 @@ async def send_whats_new(callback: CallbackQuery, button: Button, dialog_manager
 	• Добавлен новый учебник - физика
 	• Теперь каждое обновление я буду оповещать вас о нем (если вам это не нравится, то прошу написать владельцу)
 	• Исправлены ошибки
+	• Косметические улучшения
 	'''
 	for user in users:
 		try:
