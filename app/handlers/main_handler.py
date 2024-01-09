@@ -1,61 +1,39 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, ReplyKeyboardRemove
 
-from app import config
-from app.keyboards.keyboards import book_selection_kb
-from ..utils import get_subject_text, check_numbering, send_solution, Parser
+from ..dialogs import *
+from ..states import MainForm, AdminForm
 
 router = Router()
 
 
-class FormBook(StatesGroup):
-	book = State()  # Отдельный учебник какого-то автора
-	numbering = State()  # Каким образом идет нумерация учебника (параграф, страница, номер задания)
+@router.message(Command('start'))
+async def greeting(message: Message) -> None:
+	await message.answer(config.GREETING_MESSAGE.format(first_name=(message.from_user.first_name or ''),
+	                                                    last_name=(message.from_user.last_name or ''))
+	                     )
 
 
 @router.message(Command('list'))
-async def book_selection(message: Message, state: FSMContext) -> None:
-	await state.set_state(FormBook.book)
-
-	await message.answer('Выбери учебник 📐📓📊📘', reply_markup=book_selection_kb())
+async def book_selection(message: Message, dialog_manager: DialogManager) -> None:
+	await dialog_manager.start(MainForm.book)
 
 
-@router.message(FormBook.book)
-async def numbering_selection(message: Message, state: FSMContext) -> None:
-	if message.text in config.BOOKS.values():
-		await state.update_data(book=message.text)
-		await state.set_state(FormBook.numbering)
+@router.message(Command('help'))
+async def get_help(message: Message) -> None:
+	await message.answer(config.GET_HELP_MESSAGE)
 
-		subject_text = get_subject_text(message.text)
-		await message.answer(subject_text, reply_markup=ReplyKeyboardRemove())
+
+@router.message(Command('admin'))
+async def admin(message: Message, dialog_manager: DialogManager) -> None:
+	if str(message.from_user.id) == '1491267583':
+		await dialog_manager.start(AdminForm.admin)
 	else:
-		await message.reply('Такого учебника, у меня нет 😕')
-		await state.clear()
+		await message.answer('Чтобы отобразить список учебников, введите /list')
 
 
-@router.message(FormBook.numbering)
-async def get_solve(message: Message, state: FSMContext) -> None:
-	if check_numbering(message.text):
-		await state.update_data(numbering=message.text)
-		data = await state.get_data()
-
-		book = data.get('book', '')
-		numbering = data.get('numbering', '')
-
-		parser = Parser(book, numbering)
-		result = await parser.get_solution_data()
-
-		if result:
-			solution = result.get('solution')
-			title = result.get('title')
-
-			await send_solution(message, solution, title)
-		else:
-			await message.answer('Не найдено 😕')
-			await state.clear()
-	else:
-		await message.answer('Не найдено 😕')
-		await state.clear()
+@router.message()
+async def other(message: Message, state: FSMContext) -> None:
+	await state.clear()
+	await message.answer('Чтобы отобразить список учебников, введите /list')
