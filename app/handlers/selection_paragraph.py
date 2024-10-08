@@ -9,10 +9,10 @@ router = Router()
 
 
 class FormParagraph(StatesGroup):
-	paragraph = State()  # Параграф учебника
+    paragraph = State()  # Параграф учебника
 
 
 # Получить решение для учебников с выбором параграфа
 @router.message(FormParagraph.paragraph)
 async def get_solve_number(message: Message, state: FSMContext) -> None:
-	await get_solve_data(message, state, 'paragraph', 'Такого параграфа у меня нет 😕')
+    await get_solve_data(message, state, 'paragraph', 'Такого параграфа у меня нет 😕')

@@ -9,10 +9,10 @@ router = Router()
 
 
 class FormExercise(StatesGroup):
-	exercise = State()  # Упражнение в учебнике
+    exercise = State()  # Упражнение в учебнике
 
 
 # Получить решение для учебников с выбором упражнения
 @router.message(FormExercise.exercise)
 async def get_solve_exercise(message: Message, state: FSMContext) -> None:
-	await get_solve_data(message, state, 'exercise', 'Такого упражнения у меня нет 😕')
+    await get_solve_data(message, state, 'exercise', 'Такого упражнения у меня нет 😕')

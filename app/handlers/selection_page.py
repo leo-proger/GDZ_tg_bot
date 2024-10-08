@@ -9,10 +9,10 @@ router = Router()
 
 
 class FormPage(StatesGroup):
-	page = State()  # Страница учебника
+    page = State()  # Страница учебника
 
 
 # Получить решение для учебников с выбором страницы
 @router.message(FormPage.page)
 async def get_solve_page(message: Message, state: FSMContext) -> None:
-	await get_solve_data(message, state, 'page', 'Такой страницы у меня нет 😕')
+    await get_solve_data(message, state, 'page', 'Такой страницы у меня нет 😕')

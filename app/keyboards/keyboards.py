@@ -5,10 +5,10 @@ from app import config
 
 
 def book_selection_kb() -> ReplyKeyboardMarkup:
-	builder = ReplyKeyboardBuilder()
+    builder = ReplyKeyboardBuilder()
 
-	for book in config.BOOKS.values():
-		builder.add(KeyboardButton(text=book))
+    for book in config.BOOKS.values():
+        builder.add(KeyboardButton(text=book))
 
-	builder.adjust(1)  # Сколько кнопок будет по горизонтали
-	return builder.as_markup(resize_keyboard=True)
+    builder.adjust(1)  # Сколько кнопок будет по горизонтали
+    return builder.as_markup(resize_keyboard=True)
