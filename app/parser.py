@@ -7,7 +7,7 @@ from app import config
 from app.config import HEADERS, NUMBER_PATTERN
 
 
-async def parse_resheba(url: str) -> None | str:
+async def parse_resheba(url: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=HEADERS) as response:
             if response.status == 404:
@@ -25,7 +25,7 @@ async def parse_resheba(url: str) -> None | str:
             return ''.join(solution_text).replace('\n\n', '\n')
 
 
-async def parse_gdz(url: str) -> None | list[str]:
+async def parse_gdz(url: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=HEADERS) as response:
             if response.status == 404:

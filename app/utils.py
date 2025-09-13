@@ -35,7 +35,7 @@ async def get_solve_data(message: Message, state: FSMContext, data_key: str, err
     await state.clear()
 
 
-async def send_solve(message: Message, solution: list[str] | str, title: str) -> None:
+async def send_solve(message: Message, solution, title: str) -> None:
     if isinstance(solution, str):
         for text in split_text(solution):
             await message.answer(text)
