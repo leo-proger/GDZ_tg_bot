@@ -1,6 +1,6 @@
 import aiosqlite
 
-from .config import DATABASE_PATH
+from app.config import DATABASE_PATH
 
 
 class User:

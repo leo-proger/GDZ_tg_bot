@@ -4,7 +4,7 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from app.database import User
+from app.users.user import User
 
 
 class AddUserToDatabaseMiddleware(BaseMiddleware):

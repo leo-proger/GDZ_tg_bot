@@ -7,6 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 from app.config import TOKEN
 from app.handlers import main_handler, default_handlers
 from app.middlewares.add_user_to_db_middleware import AddUserToDatabaseMiddleware
+from app.users.database import create_users_table
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,6 +15,8 @@ bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode='Markdown'))
 
 
 async def main():
+    await create_users_table()
+
     dp = Dispatcher()
 
     main_handler.router.message.middleware(AddUserToDatabaseMiddleware())
